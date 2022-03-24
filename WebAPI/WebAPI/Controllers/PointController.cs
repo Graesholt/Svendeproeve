@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PointController : ControllerBase
@@ -27,10 +29,12 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Point>> PostPoint(Point point)
         {
+            point.DateTime = DateTime.Now; //Do not trust client time, server time is infallable
+
             _context.Points.Add(point);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPoint", new { id = point.PointId }, point);
+            return StatusCode(201);
         }
 
         private bool PointExists(int id)

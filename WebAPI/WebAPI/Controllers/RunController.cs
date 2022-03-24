@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RunController : ControllerBase
@@ -62,6 +64,10 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Run>> PostRun(Run run)
         {
+            run.DateTime = DateTime.Now; //Do not trust client time, server time is infallable
+            run.User = await _context.Users.FirstOrDefaultAsync(u => u.UserId == GetUserId());
+            run.Deleted = false;
+
             _context.Runs.Add(run);
             await _context.SaveChangesAsync();
 
@@ -92,6 +98,11 @@ namespace WebAPI.Controllers
         private bool RunExists(int id)
         {
             return _context.Runs.Any(e => e.RunId == id);
+        }
+
+        protected int GetUserId()
+        {
+            return int.Parse(this.User.Claims.First(i => i.Type == "UserId").Value);
         }
     }
 }
