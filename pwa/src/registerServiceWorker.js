@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 
 import { register } from 'register-service-worker'
+//import axios from "axios";
 
-if (process.env.NODE_ENV === 'production') {
+//if (process.env.NODE_ENV === 'production') {
   register(`${process.env.BASE_URL}service-worker.js`, {
     ready () {
       console.log(
@@ -12,6 +13,12 @@ if (process.env.NODE_ENV === 'production') {
     },
     registered () {
       console.log('Service worker has been registered.')
+      /*
+        setInterval(async() => {
+        let user = { username: new Date().toUTCString(), password: "123qwe123" };
+          await axios.post("https://webapi-uc0.conveyor.cloud/api/User/Register", user);
+      }, 10000)
+      */
     },
     cached () {
       console.log('Content has been cached for offline use.')
@@ -29,4 +36,4 @@ if (process.env.NODE_ENV === 'production') {
       console.error('Error during service worker registration:', error)
     }
   })
-}
+//}

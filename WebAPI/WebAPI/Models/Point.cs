@@ -14,6 +14,8 @@
 
         public double Latitude { get; set; }
 
+        public double ? altitude { get; set; }
+
         public DateTime DateTime { get; set; }
     }
 }

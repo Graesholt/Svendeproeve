@@ -85,7 +85,7 @@ namespace WebAPI.Controllers
 
             if (user != null)
             {
-                return Conflict("Username already in use");
+                return Conflict("Username already registered");
             }
 
             registerUser.Password = BCryptNet.HashPassword(registerUser.Password, BCryptNet.GenerateSalt());

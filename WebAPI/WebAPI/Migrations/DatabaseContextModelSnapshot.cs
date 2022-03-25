@@ -42,6 +42,9 @@ namespace WebAPI.Migrations
                     b.Property<int?>("RunId")
                         .HasColumnType("int");
 
+                    b.Property<double?>("altitude")
+                        .HasColumnType("float");
+
                     b.HasKey("PointId");
 
                     b.HasIndex("RunId");

@@ -55,15 +55,17 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
-        /// CreateNewRun
+        /// NewRun
         /// </summary>
         /// <param name="run"></param>
         /// <returns></returns>
         // POST: api/Run
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Run>> PostRun(Run run)
+        [HttpPost("NewRun")]
+        public async Task<ActionResult<Run>> PostRun()
         {
+            var run = new Run();
+
             run.DateTime = DateTime.Now; //Do not trust client time, server time is infallable
             run.User = await _context.Users.FirstOrDefaultAsync(u => u.UserId == GetUserId());
             run.Deleted = false;

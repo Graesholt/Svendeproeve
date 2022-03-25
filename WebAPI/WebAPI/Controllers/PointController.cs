@@ -26,7 +26,7 @@ namespace WebAPI.Controllers
 
         // POST: api/Point
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("NewPoint")]
         public async Task<ActionResult<Point>> PostPoint(Point point)
         {
             point.DateTime = DateTime.Now; //Do not trust client time, server time is infallable
