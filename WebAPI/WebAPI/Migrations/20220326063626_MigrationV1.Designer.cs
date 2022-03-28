@@ -12,8 +12,8 @@ using WebAPI.Context;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220322112036_MigrationV3")]
-    partial class MigrationV3
+    [Migration("20220326063626_MigrationV1")]
+    partial class MigrationV1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,72 +26,75 @@ namespace WebAPI.Migrations
 
             modelBuilder.Entity("WebAPI.Models.Point", b =>
                 {
-                    b.Property<int>("PointId")
+                    b.Property<int>("pointId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PointId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("pointId"), 1L, 1);
 
-                    b.Property<DateTime>("DateTime")
+                    b.Property<double?>("altitude")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("dateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("Latitude")
+                    b.Property<double>("latitude")
                         .HasColumnType("float");
 
-                    b.Property<double>("Longitude")
+                    b.Property<double>("longitude")
                         .HasColumnType("float");
 
-                    b.Property<int?>("RunId")
+                    b.Property<int?>("runId")
                         .HasColumnType("int");
 
-                    b.HasKey("PointId");
+                    b.HasKey("pointId");
 
-                    b.HasIndex("RunId");
+                    b.HasIndex("runId");
 
                     b.ToTable("Points");
                 });
 
             modelBuilder.Entity("WebAPI.Models.Run", b =>
                 {
-                    b.Property<int>("RunId")
+                    b.Property<int>("runId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RunId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("runId"), 1L, 1);
 
-                    b.Property<DateTime>("DateTime")
+                    b.Property<DateTime>("dateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Deleted")
+                    b.Property<bool>("deleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("userId")
                         .HasColumnType("int");
 
-                    b.HasKey("RunId");
+                    b.HasKey("runId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("userId");
 
                     b.ToTable("Runs");
                 });
 
             modelBuilder.Entity("WebAPI.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("userId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userId"), 1L, 1);
 
-                    b.Property<string>("Password")
+                    b.Property<string>("password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserId");
+                    b.HasKey("userId");
 
                     b.ToTable("Users");
                 });
@@ -99,24 +102,24 @@ namespace WebAPI.Migrations
             modelBuilder.Entity("WebAPI.Models.Point", b =>
                 {
                     b.HasOne("WebAPI.Models.Run", null)
-                        .WithMany("Points")
-                        .HasForeignKey("RunId");
+                        .WithMany("points")
+                        .HasForeignKey("runId");
                 });
 
             modelBuilder.Entity("WebAPI.Models.Run", b =>
                 {
-                    b.HasOne("WebAPI.Models.User", "User")
+                    b.HasOne("WebAPI.Models.User", "user")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("userId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("WebAPI.Models.Run", b =>
                 {
-                    b.Navigation("Points");
+                    b.Navigation("points");
                 });
 #pragma warning restore 612, 618
         }

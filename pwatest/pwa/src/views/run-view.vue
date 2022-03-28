@@ -1,5 +1,5 @@
 <template>
-<input type="button" v-model="refStartRunButton" @click="newRun"/><br />
+  <input type="button" v-model="refStartRunButton" @click="newRun" /><br />
 </template>
 
 <script async setup>
@@ -12,58 +12,60 @@ import Worker from 'web-worker';
 const router = useRouter();
 const store = useStore();
 
-
-var refStartRunButton = ref('');
+var refStartRunButton = ref("");
 refStartRunButton.value = "Start Løbetur";
 var running = false;
+//var myInterval;
+var myWorker;
 
 async function newRun() {
-    if (running == false)
-    {
-            running = true;
-            refStartRunButton.value = "Stop Løbetur";
-            await axios
-              .post("http://localhost:5268/api/Run/NewRun", "", { headers: {Authorization : `Bearer ${store.state.user.token}`} })
-              .then(function (response) {
-                    console.log(response.data);
-                    const worker = new Worker('data:,postMessage("Run")');
-                    worker.onmessage = async() => {
-                          if (running == true)
-                          {
-                              //GetPoint
-                              console.log("GetPoint")
-                              var GeoLocation
-                              navigator.geolocation.watchPosition(async(position) => {
-                              console.log("position", position)
-                              GeoLocation = position.coords;
-                              console.log("Geolocation", GeoLocation)
-                              let point = { Longitude: GeoLocation.longitude, Latitude: GeoLocation.latitude, altitude: GeoLocation.altitude }
-                              console.log("point", point)
-                              //PostPoint
-                              console.log("PostPoint")
-                              await axios .post("http://localhost:5268/api/Point/NewPoint", point, { headers: {Authorization : `Bearer ${store.state.user.token}`} })
-                              //Wait
-                              console.log("Wait")
-                              await new Promise(r => setTimeout(r, 1000));
-                              });
-                          }
-                          else if (running == false)
-                          {
-                              return
-                          }
-                      };
-              });
-    }
-    else if (running == true)
-    {
-        //Stop worker?!?!?!
-        running = false;
-        router.push("/runs-view");
-    }
+  if (running == false) {
+    running = true;
+    refStartRunButton.value = "Stop Løbetur";
+    await axios
+      .post("http://localhost:5268/api/Run/NewRun", "", {
+        headers: { Authorization: `Bearer ${store.state.user.token}` },
+      })
+      .then(function (response) {
+        console.log(response.data);
+        myWorker = new Worker('data:,postMessage("hello")');
+        myWorker.onmessage = async() => {
+        while(running == true) {
+            newPoint()
+            await new Promise(r => setTimeout(r, 10000));
+        }
+};
+      });
+  } else if (running == true) {
+    running = false;
+    myWorker.terminate();
+    router.push("/runs-view");
+  }
 }
 
-
+function newPoint() {
+  //GetPoint
+  console.log("GetPoint");
+  var GeoLocation;
+  navigator.geolocation.getCurrentPosition((position) => {
+    console.log("position", position);
+    GeoLocation = position.coords;
+    console.log("Geolocation", GeoLocation);
+    let point = {
+      longitude: GeoLocation.longitude,
+      latitude: GeoLocation.latitude,
+      altitude: GeoLocation.altitude,
+    };
+    console.log("point", point);
+    //PostPoint
+    console.log("PostPoint");
+    axios.post("http://localhost:5268/api/Point/NewPoint", point, {
+      headers: { Authorization: `Bearer ${store.state.user.token}` },
+    });
+  });
+}
 </script>
+
 
 
 /* 

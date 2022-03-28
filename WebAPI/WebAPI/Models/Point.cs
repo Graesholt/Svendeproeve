@@ -8,14 +8,16 @@
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int PointId { get; set; }
+        public int pointId { get; set; }
 
-        public double Longitude { get; set; }
+        public DateTime dateTime { get; set; }
 
-        public double Latitude { get; set; }
+        public double longitude { get; set; }
+
+        public double latitude { get; set; }
 
         public double ? altitude { get; set; }
 
-        public DateTime DateTime { get; set; }
+
     }
 }

@@ -42,9 +42,9 @@ namespace WebAPI.Controllers
         {
             //var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginUser.Username);
             
-            var user = (await _context.Users.Where(u => u.Username == loginUser.Username).ToListAsync()).FirstOrDefault(u => u.Username == loginUser.Username); //Case sensitivity hack
+            var user = (await _context.Users.Where(u => u.username == loginUser.username).ToListAsync()).FirstOrDefault(u => u.username == loginUser.username); //Case sensitivity hack
 
-            if ((user == null) || (!BCryptNet.Verify(loginUser.Password, user.Password)))
+            if ((user == null) || (!BCryptNet.Verify(loginUser.password, user.password)))
             {
                 return NotFound("User info not correct");
             }
@@ -59,7 +59,7 @@ namespace WebAPI.Controllers
             ////Create a List of Claims, Keep claims name short
             var permClaims = new List<Claim>();
             permClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-            permClaims.Add(new Claim("UserId", user.UserId.ToString()));
+            permClaims.Add(new Claim("userId", user.userId.ToString()));
 
             ////Create Security Token object by giving required parameters
             var token = new JwtSecurityToken(issuer, ////Issuer
@@ -81,14 +81,14 @@ namespace WebAPI.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult<User>> RegisterUser(User registerUser)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == registerUser.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.username == registerUser.username);
 
             if (user != null)
             {
                 return Conflict("Username already registered");
             }
 
-            registerUser.Password = BCryptNet.HashPassword(registerUser.Password, BCryptNet.GenerateSalt());
+            registerUser.password = BCryptNet.HashPassword(registerUser.password, BCryptNet.GenerateSalt());
 
             _context.Users.Add(registerUser);
             await _context.SaveChangesAsync();
@@ -98,7 +98,7 @@ namespace WebAPI.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.Users.Any(e => e.UserId == id);
+            return _context.Users.Any(e => e.userId == id);
         }
     }
 }

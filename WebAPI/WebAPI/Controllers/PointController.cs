@@ -29,7 +29,7 @@ namespace WebAPI.Controllers
         [HttpPost("NewPoint")]
         public async Task<ActionResult<Point>> PostPoint(Point point)
         {
-            point.DateTime = DateTime.Now; //Do not trust client time, server time is infallable
+            point.dateTime = DateTime.Now; //Do not trust client time, server time is infallable
 
             _context.Points.Add(point);
             await _context.SaveChangesAsync();
@@ -39,7 +39,7 @@ namespace WebAPI.Controllers
 
         private bool PointExists(int id)
         {
-            return _context.Points.Any(e => e.PointId == id);
+            return _context.Points.Any(e => e.pointId == id);
         }
     }
 }

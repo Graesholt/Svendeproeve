@@ -66,14 +66,14 @@ namespace WebAPI.Controllers
         {
             var run = new Run();
 
-            run.DateTime = DateTime.Now; //Do not trust client time, server time is infallable
-            run.User = await _context.Users.FirstOrDefaultAsync(u => u.UserId == GetUserId());
-            run.Deleted = false;
+            run.dateTime = DateTime.Now; //Do not trust client time, server time is infallable
+            run.user = await _context.Users.FirstOrDefaultAsync(u => u.userId == GetUserId());
+            run.deleted = false;
 
             _context.Runs.Add(run);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetRun", new { id = run.RunId }, run);
+            return CreatedAtAction("GetRun", new { id = run.runId }, run);
         }
 
         /// <summary>
@@ -99,12 +99,12 @@ namespace WebAPI.Controllers
 
         private bool RunExists(int id)
         {
-            return _context.Runs.Any(e => e.RunId == id);
+            return _context.Runs.Any(e => e.runId == id);
         }
 
         protected int GetUserId()
         {
-            return int.Parse(this.User.Claims.First(i => i.Type == "UserId").Value);
+            return int.Parse(this.User.Claims.First(i => i.Type == "userId").Value);
         }
     }
 }

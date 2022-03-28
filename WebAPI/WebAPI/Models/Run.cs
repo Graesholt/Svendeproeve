@@ -8,14 +8,14 @@
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int RunId { get; set; }
+        public int runId { get; set; }
 
-        public DateTime DateTime { get; set; }
+        public DateTime dateTime { get; set; }
 
-        public User User { get; set; }
+        public User user { get; set; }
 
-        public List<Point> Points { get; set; }
+        public List<Point> points { get; set; }
 
-        public bool Deleted { get; set; }
+        public bool deleted { get; set; }
     }
 }

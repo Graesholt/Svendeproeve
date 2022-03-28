@@ -13,33 +13,34 @@ namespace WebAPI.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false)
+                    userId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    password = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.UserId);
+                    table.PrimaryKey("PK_Users", x => x.userId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Runs",
                 columns: table => new
                 {
-                    RunId = table.Column<int>(type: "int", nullable: false)
+                    runId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false)
+                    dateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    userId = table.Column<int>(type: "int", nullable: false),
+                    deleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Runs", x => x.RunId);
+                    table.PrimaryKey("PK_Runs", x => x.runId);
                     table.ForeignKey(
-                        name: "FK_Runs_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Runs_Users_userId",
+                        column: x => x.userId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
+                        principalColumn: "userId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -47,30 +48,33 @@ namespace WebAPI.Migrations
                 name: "Points",
                 columns: table => new
                 {
-                    PointId = table.Column<int>(type: "int", nullable: false)
+                    pointId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RunId = table.Column<int>(type: "int", nullable: true)
+                    dateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    longitude = table.Column<double>(type: "float", nullable: false),
+                    latitude = table.Column<double>(type: "float", nullable: false),
+                    altitude = table.Column<double>(type: "float", nullable: true),
+                    runId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Points", x => x.PointId);
+                    table.PrimaryKey("PK_Points", x => x.pointId);
                     table.ForeignKey(
-                        name: "FK_Points_Runs_RunId",
-                        column: x => x.RunId,
+                        name: "FK_Points_Runs_runId",
+                        column: x => x.runId,
                         principalTable: "Runs",
-                        principalColumn: "RunId");
+                        principalColumn: "runId");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Points_RunId",
+                name: "IX_Points_runId",
                 table: "Points",
-                column: "RunId");
+                column: "runId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Runs_UserId",
+                name: "IX_Runs_userId",
                 table: "Runs",
-                column: "UserId");
+                column: "userId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
