@@ -41,7 +41,6 @@ namespace WebAPI.Controllers
         public async Task<ActionResult<User>> GetUser(User loginUser)
         {
             //var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginUser.Username);
-            
             var user = (await _context.Users.Where(u => u.username == loginUser.username).ToListAsync()).FirstOrDefault(u => u.username == loginUser.username); //Case sensitivity hack
 
             if ((user == null) || (!BCryptNet.Verify(loginUser.password, user.password)))
@@ -81,7 +80,8 @@ namespace WebAPI.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult<User>> RegisterUser(User registerUser)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.username == registerUser.username);
+            //var user = await _context.Users.FirstOrDefaultAsync(u => u.username == registerUser.username);
+            var user = (await _context.Users.Where(u => u.username == registerUser.username).ToListAsync()).FirstOrDefault(u => u.username == registerUser.username); //Case sensitivity hack
 
             if (user != null)
             {

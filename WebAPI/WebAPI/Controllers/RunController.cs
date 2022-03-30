@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.Context;
+using WebAPI.DTO;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers
@@ -32,7 +33,8 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Run>>> GetRuns()
         {
-            return await _context.Runs.ToListAsync();
+            //return await _context.Runs.ToListAsync();
+            return await _context.Runs.Where(r => (r.user.userId == GetUserId()) && (r.deleted == false)).ToListAsync();
         }
 
         /// <summary>
@@ -41,17 +43,37 @@ namespace WebAPI.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         // GET: api/Run/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Run>> GetRun(int id)
+        [HttpGet("{runId}")]
+        public async Task<ActionResult<RunStats>> GetRun(int runId)
         {
-            var run = await _context.Runs.FindAsync(id);
+            var run = await _context.Runs.Include("points").FirstOrDefaultAsync(r => r.runId == runId);
+            //.Include("points") gets a list of points associated with this run as a property on the object.
 
             if (run == null)
             {
                 return NotFound();
             }
 
-            return run;
+            //Distance
+            double distance = 0;
+            foreach(Point point in run.points)
+            {
+
+            }
+
+            //Duration
+            TimeSpan duration = new TimeSpan(0, 0, 0);
+            duration = run.points.Last().dateTime.Subtract(run.dateTime);
+
+            //Average Speed
+            float avgSpeedInKmt = 0;
+
+            //Average Speed pr minute (for chart)
+            List<float> avgSpeedInKmtPerMinute = new List<float>();
+
+            RunStats runStats = new RunStats(run, distance, duration, avgSpeedInKmt, avgSpeedInKmtPerMinute);
+
+            return runStats;
         }
 
         /// <summary>
@@ -91,7 +113,8 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
-            _context.Runs.Remove(run);
+            run.deleted = true;
+            //_context.Runs.Remove(run);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -105,6 +128,24 @@ namespace WebAPI.Controllers
         protected int GetUserId()
         {
             return int.Parse(this.User.Claims.First(i => i.Type == "userId").Value);
+        }
+
+        //Calculating distance from coordinates is no simple task, so the following function has been stolen with pride from stackoverflow.
+        //Originally written in JavaScript, the small task of converting it to C# fell to myself.
+        //It is based on the Haversine formula, a formula for calculating distance on a spherical surface, the sphere in this case being the planet.
+        //https://stackoverflow.com/questions/639695/how-to-convert-latitude-or-longitude-to-meters
+        protected double latLongDistanceiInMeters(float lat1, float lon1, float lat2, float lon2)
+        {
+            double R = 6378.137; // Radius of earth in KM
+            double dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+            double dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+            Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180) *
+            Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            double d = R * c;
+
+            return d * 1000; // meters
         }
     }
 }

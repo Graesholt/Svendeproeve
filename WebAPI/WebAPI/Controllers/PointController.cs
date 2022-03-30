@@ -26,12 +26,14 @@ namespace WebAPI.Controllers
 
         // POST: api/Point
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("NewPoint")]
-        public async Task<ActionResult<Point>> PostPoint(Point point)
+        [HttpPost("NewPoint/{runId}")]
+        public async Task<ActionResult<Point>> PostPoint(Point point, int runId)
         {
             point.dateTime = DateTime.Now; //Do not trust client time, server time is infallable
+            var run = _context.Runs.Include("points").FirstOrDefault(r => r.runId == runId);
 
-            _context.Points.Add(point);
+            run.points.Add(point);
+            //_context.Points.Add(point);
             await _context.SaveChangesAsync();
 
             return StatusCode(201);
