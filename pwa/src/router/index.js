@@ -13,14 +13,19 @@ const routes = [
     component: () => import(/* webpackChunkName: "Runs" */ "../views/register-view.vue")
 },
 {
+    path: "/newrun-view",
+    name: "newrun-view",
+    component: () => import(/* webpackChunkName: "Runs" */ "../views/newrun-view.vue")
+},
+{
+    path: "/run-view/:runId",
+    name: "run-view",
+    component: () => import(/* webpackChunkName: "Runs" */ "../views/run-view.vue")
+},
+{
     path: "/runs-view",
     name: "runs-view",
     component: () => import(/* webpackChunkName: "Runs" */ "../views/runs-view.vue")
-},
-{
-    path: "/run-view",
-    name: "run-view",
-    component: () => import(/* webpackChunkName: "Runs" */ "../views/run-view.vue")
 }
 ]
 
