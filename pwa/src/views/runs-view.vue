@@ -1,4 +1,5 @@
 <template>
+  <router-link to="/runs-view">Log ud</router-link>
   <div>Løbeture</div>
   <br />
   <DataTable :value="refRuns">

@@ -40,7 +40,7 @@ async function newRun() {
     running = false;
     myWorker.terminate();
     newPoint();
-    router.push("/runs-view");
+    router.push("/run-view/" + runId);
   }
 }
 

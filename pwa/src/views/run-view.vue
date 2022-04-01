@@ -1,27 +1,6 @@
 <template>
-  <div id="map">
-    <l-map ref="map" v-model="zoom" v-model:zoom="zoom" :center="center">
-      <l-tile-layer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      ></l-tile-layer>
-      <l-control-layers />
-      <l-marker :lat-lng="[47.41322, -1.219482]">
-        <l-tooltip> Start </l-tooltip>
-      </l-marker>
-      <l-polyline
-        :lat-lngs="[
-          [47.334852, -1.509485],
-          [47.342596, -1.328731],
-          [47.241487, -1.190568],
-          [47.234787, -1.358337],
-        ]"
-        color="blue"
-      ></l-polyline>
-      <l-marker :lat-lng="[47.41333, -1.219493]">
-        <l-tooltip> Slut </l-tooltip>
-      </l-marker>
-    </l-map>
-  </div>
+  <router-link to="/runs-view">Tilbage</router-link>
+  <div id="map"></div>
   <p>Varighed: {{ refRun.duration }}</p>
   <p>Distance: {{ refRun.distance }}</p>
   <p>Gennemsnitshastighed: {{ refRun.avgSpeedInMetersPerSecond }}</p>
@@ -29,63 +8,69 @@
   <p>Højdekurve</p>
 </template>
 
-<script>
+<script async setup>
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import {
-  LMap,
-  LIcon,
-  LTileLayer,
-  LMarker,
-  LControlLayers,
-  LTooltip,
-  LPopup,
-  LPolyline,
-  LPolygon,
-  LRectangle,
-} from "@vue-leaflet/vue-leaflet";
-import "leaflet/dist/leaflet.css";
 
-export default {
-  components: {
-    LMap,
-    LIcon,
-    LTileLayer,
-    LMarker,
-    LControlLayers,
-    LTooltip,
-    LPopup,
-    LPolyline,
-    LPolygon,
-    LRectangle,
-  },
-  data() {
-    return {
-      refRun: {},
-      zoom: 19,
-      center: [0, 0]
-    };
-  },
-  async beforeMount() {
-    const router = useRouter();
-    const store = useStore();
+const router = useRouter();
+const store = useStore();
 
-    let response = await axios.get(
-      "http://localhost:5268/api/Run/" + router.currentRoute.value.params.runId,
-      {
-        headers: { Authorization: `Bearer ${store.state.user.token}` },
-      }
-    );
+var refRun = ref("");
+
+axios
+  .get(
+    "http://localhost:5268/api/Run/" + router.currentRoute.value.params.runId,
+    {
+      headers: { Authorization: `Bearer ${store.state.user.token}` },
+    }
+  )
+  .then(function (response) {
     console.log(response.data);
-    this.refRun = response.data;
+    refRun.value = response.data;
 
-    //this.center = [this.refRun.centerLatitude, this.refRun.centerLongitude]
-    //console.log(this.center);
-    this.$refs.map.setView([this.refRun.centerLatitude, this.refRun.centerLongitude], 8);
-  }
-};
+    console.log(refRun.value.centerLatitude);
+    var map = L.map("map").setView(
+      new L.LatLng(refRun.value.centerLatitude, refRun.value.centerLongitude),
+      14
+    );
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+      maxZoom: 19,
+      id: "mapbox/streets-v11",
+      tileSize: 256,
+    }).addTo(map);
+
+    var pointList = [];
+    response.data.points.forEach((element) => {
+      pointList.push(new L.LatLng(element.latitude, element.longitude));
+    });
+
+    var runPolyline = new L.Polyline(pointList, {
+      color: "blue",
+      //weight: 5,
+      opacity: 0.5,
+      smoothFactor: 0,
+    }).addTo(map);
+
+    var startTooltip = L.tooltip({
+      direction: "top",
+      permanent: true,
+    })
+      .setLatLng(pointList[0])
+      .setContent("Start")
+      .addTo(map);
+
+    var endTooltip = L.tooltip({
+      direction: "bottom",
+      permanent: true,
+    })
+      .setLatLng(pointList[pointList.length - 1])
+      .setContent("Slut")
+      .addTo(map);
+  });
 </script>
 
 <style scoped>
@@ -94,17 +79,3 @@ export default {
   width: 50vw;
 }
 </style>
-
-/*
-    const router = useRouter();
-    const store = useStore();
-
-    let response = await axios.get(
-      "http://localhost:5268/api/Run/" + router.currentRoute.value.params.runId,
-      {
-        headers: { Authorization: `Bearer ${store.state.user.token}` },
-      }
-    );
-    console.log(response.data);
-    this.refRun = response.data;
-*/
