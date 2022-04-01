@@ -21,7 +21,7 @@ var refRun = ref("");
 
 axios
   .get(
-    "http://localhost:5268/api/Run/" + router.currentRoute.value.params.runId,
+    process.env.VUE_APP_API_URL + "api/Run/" + router.currentRoute.value.params.runId,
     {
       headers: { Authorization: `Bearer ${store.state.user.token}` },
     }

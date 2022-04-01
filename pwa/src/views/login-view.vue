@@ -8,6 +8,7 @@
   <br />
   <input type="button" value="Login" @click="attemptLogin" /><br />
   <router-link to="/register-view">Register</router-link>
+  <div>Version: 01/04 13:08</div>
 </template>
 
 <script async setup>
@@ -26,7 +27,7 @@ var refErrorDiv = ref("");
 async function attemptLogin() {
   let user = { username: refUsername.value, password: refPassword.value };
   try {
-    let response = await axios.post("http://localhost:5268/api/User/Login", user);
+    let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
     store.state.user.token = response.data;
     console.log(store.state.user)
     router.push("/runs-view");

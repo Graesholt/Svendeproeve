@@ -23,7 +23,7 @@ async function newRun() {
     running = true;
     refStartRunButton.value = "Stop Løbetur";
     await axios
-      .post("http://localhost:5268/api/Run/NewRun", "", {headers: { Authorization: `Bearer ${store.state.user.token}` },})
+      .post(process.env.VUE_APP_API_URL + "api/Run/NewRun", "", {headers: { Authorization: `Bearer ${store.state.user.token}` },})
       .then(function (response) {
         console.log(response.data);
         runId = response.data.runId;
@@ -60,7 +60,7 @@ function newPoint() {
     console.log("point", point);
     //PostPoint
     console.log("PostPoint");
-    axios.post("http://localhost:5268/api/Point/NewPoint/" + runId, point, {headers: { Authorization: `Bearer ${store.state.user.token}` },});
-  });
+    axios.post(process.env.VUE_APP_API_URL + "api/Point/NewPoint/" + runId, point, {headers: { Authorization: `Bearer ${store.state.user.token}` },});
+  }, (() => {}), { enableHighAccuracy: true });
 }
 </script>

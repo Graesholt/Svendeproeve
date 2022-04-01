@@ -34,7 +34,7 @@ async function attemptRegistration() {
   }
   let user = { username: refUsername.value, password: refPassword.value };
   try {
-    await axios.post("http://localhost:5268/api/User/Register", user);
+    await axios.post(process.env.VUE_APP_API_URL + "api/User/Register", user);
     router.push("/");
   } catch (exception) {
     console.log(exception);

@@ -40,7 +40,7 @@ refRuns.value = [];
 
 function getRuns() {
   axios
-    .get("http://localhost:5268/api/Run", {
+    .get(process.env.VUE_APP_API_URL + "api/Run", {
       headers: { Authorization: `Bearer ${store.state.user.token}` },
     })
     .then(function (response) {
@@ -57,7 +57,7 @@ router.push("/run-view/" + slotProps.data.runId);
 
 function deleteRun(slotProps) {
   axios
-    .delete("http://localhost:5268/api/Run/" + slotProps.data.runId, {
+    .delete(process.env.VUE_APP_API_URL + "api/Run/" + slotProps.data.runId, {
       headers: { Authorization: `Bearer ${store.state.user.token}` },
     })
     .then(function (response) {
