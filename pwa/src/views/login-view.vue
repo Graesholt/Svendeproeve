@@ -1,14 +1,36 @@
 <template>
-  <div>Login</div>
-  <label>Username</label><br />
-  <input type="text" v-model="refUsername" name="Username" /><br />
-  <label>Password</label><br />
-  <input type="password" v-model="refPassword" name="Password" /><br />
-  <div v-if="refErrorDiv">{{ refErrorDiv }}</div>
-  <br />
-  <input type="button" value="Login" @click="attemptLogin" /><br />
-  <router-link to="/register-view">Register</router-link>
-  <div>Version: 03/04 08:22</div>
+  <Card>
+    <template #title>
+      <p class="center-text card-title">Log ind</p>
+    </template>
+    <template #content>
+      <p class="center-text">Brugernavn</p>
+      <InputText type="text" class="center-input-field" v-model="refUsername" name="Username" />
+      <p class="center-text">Kodeord</p>
+      <InputText type="password" class="center-input-field" v-model="refPassword" name="Password" />
+      <p v-if="refErrorDiv" class="error-text-height error-text center-text">
+        {{ refErrorDiv }}
+      </p>
+      <div v-else class="error-text-height"></div>
+      <div class="center-div">
+      <Button
+        label="Login"
+        value="Login"
+        class="p-button-success left-button"
+        @click="attemptLogin"
+      />
+      <Button
+        label="Register"
+        value="Register"
+        class="p-button-success p-button-outlined right-button"
+        @click="router.push('/register-view')"
+      />
+      </div>
+    </template>
+    <template #footer>
+      <p class="center-text version-text">Version: 03/04 08:22</p>
+    </template>
+  </Card>
 </template>
 
 <script async setup>
@@ -27,9 +49,13 @@ var refErrorDiv = ref("");
 async function attemptLogin() {
   let user = { username: refUsername.value, password: refPassword.value };
   try {
-    let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
+    let response = await axios.post(
+      process.env.VUE_APP_API_URL + "api/User/Login",
+      user
+    );
     store.state.user.token = response.data;
-    console.log(store.state.user)
+    localStorage.setItem("jwtToken", response.data);
+    console.log(store.state.user);
     router.push("/runs-view");
   } catch (exception) {
     console.log(exception);
@@ -40,5 +66,13 @@ async function attemptLogin() {
 }
 </script>
 
-<style>
+<style scoped>
+.p-card {
+  margin: auto;
+  width: 50%;
+  min-width: 300px;
+  /*padding: 10px;*/
+
+  margin-top: 15vh;
+}
 </style>
