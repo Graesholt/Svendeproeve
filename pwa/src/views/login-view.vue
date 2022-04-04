@@ -8,7 +8,7 @@
   <br />
   <input type="button" value="Login" @click="attemptLogin" /><br />
   <router-link to="/register-view">Register</router-link>
-  <div>Version: 01/04 13:08</div>
+  <div>Version: 03/04 08:22</div>
 </template>
 
 <script async setup>
