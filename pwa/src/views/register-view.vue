@@ -5,43 +5,18 @@
     </template>
     <template #content>
       <p class="center-text">Brugernavn</p>
-      <InputText
-        type="text"
-        class="center-input-field"
-        v-model="refUsername"
-        name="Username"
-      />
+      <InputText type="text" class="center-input-field" v-model="refUsername" name="Username" />
       <p class="center-text">Kodeord</p>
-      <InputText
-        type="password"
-        class="center-input-field"
-        v-model="refPassword"
-        name="Password"
-      />
+      <InputText type="password" class="center-input-field" v-model="refPassword" name="Password" />
       <p class="center-text">Gentag kodeord</p>
-      <InputText
-        type="password"
-        class="center-input-field"
-        v-model="refPasswordConfirm"
-        name="PasswordConfirm"
-      />
+      <InputText type="password" class="center-input-field" v-model="refPasswordConfirm" name="PasswordConfirm" />
       <p v-if="refErrorDiv" class="error-text-height error-text center-text">
         {{ refErrorDiv }}
       </p>
       <div v-else class="error-text-height"></div>
       <div class="center-div">
-        <Button
-          label="Register"
-          value="Register"
-          class="p-button-success left-button"
-          @click="attemptRegistration"
-        />
-        <Button
-          label="Login"
-          value="Login"
-          class="p-button-success p-button-outlined right-button"
-          @click="router.push('/')"
-        />
+        <Button label="Register" value="Register" class="p-button-success left-button" @click="attemptRegistration" />
+        <Button label="Login" value="Login" class="p-button-success p-button-outlined right-button" @click="router.push('/')" />
       </div>
     </template>
     <template #footer> </template>

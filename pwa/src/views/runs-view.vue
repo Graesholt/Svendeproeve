@@ -5,55 +5,27 @@
     </template>
     <template #content>
       <div class="center-div">
-        <Button
-          label="Ny løbetur"
-          value="Ny løbetur"
-          class="p-button-success left-button"
-          @click="router.push('/newrun-view')"
-        />
-        <Button
-          label="Log ud"
-          value="Log ud"
-          class="p-button-danger p-button-outlined right-button"
-          @click="logOut"
-        />
+        <Button label="Ny løbetur" value="Ny løbetur" class="p-button-success left-button" @click="router.push('/newrun-view')" />
+        <Button label="Log ud" value="Log ud" class="p-button-danger p-button-outlined right-button" @click="logOut" />
       </div>
       <br />
-            <div class="center-div">
-      <DataTable :value="refRuns" :scrollable="true" style="min-width: 325px; width: 75%" :rowHover="true" @row-click="viewRunRow($event)">
-        <Column
-          field="dateTime"
-          header="Tidspunkt"
-          class="datatable-column"
-          style="min-width: 250px; width: 50%; padding: 8px; padding-left: 16px"
-        >
-          <template #body="slotProps">
-            <Button
-              :label="new Date(slotProps.data.dateTime).toLocaleDateString() + ' - ' + new Date(slotProps.data.dateTime).toLocaleTimeString()"
-              class="p-button-text"
-              @click="viewRun(slotProps)"
-              style="padding-left: 0px"
-            />
-          </template>
-        </Column>
-        <Column
-          class="datatable-column datatable-delete-column"
-          style="max-width: 56px; padding: 8px"
-        >
-          <template #body="slotProps">
-            <Button
-              icon="pi pi-trash"
-              iconPos="right"
-              class="p-button-danger"
-              @click="deleteRun(slotProps)"
-            />
-          </template>
-        </Column>
-      </DataTable>
-            </div>
+      <div class="center-div">
+        <DataTable :value="refRuns" :scrollable="true" style="min-width: 325px; width: 75%" :rowHover="true" @row-click="viewRunRow($event)">
+          <Column field="dateTime" header="Tidspunkt" class="datatable-column" style="min-width: 250px; width: 50%; padding: 8px; padding-left: 16px">
+            <template #body="slotProps">
+              <p>{{ new Date(slotProps.data.dateTime).toLocaleDateString() + ' - ' + new Date(slotProps.data.dateTime).toLocaleTimeString()}} </p>
+            </template>
+          </Column>
+          <Column class="datatable-column datatable-delete-column" style="max-width: 56px; padding: 8px">
+            <template #body="slotProps">
+              <Button icon="pi pi-trash" iconPos="right" class="p-button-danger" @click="deleteRun(slotProps)" />
+            </template>
+          </Column>
+        </DataTable>
+      </div>
     </template>
     <template #footer> </template>
-  </Card>   
+  </Card>
 </template>
 
 <script async setup>
@@ -68,6 +40,7 @@ const store = useStore();
 var refRuns = ref("");
 refRuns.value = [];
 
+getRuns();
 function getRuns() {
   axios
     .get(process.env.VUE_APP_API_URL + "api/Run", {
@@ -78,8 +51,6 @@ function getRuns() {
       refRuns.value = response.data;
     });
 }
-
-getRuns();
 
 function logOut() {
   store.state.user.token = "";
@@ -92,7 +63,7 @@ function viewRun(slotProps) {
 }
 
 function viewRunRow(e) {
-    console.log(e.data.runId)
+  console.log(e.data.runId);
   router.push("/run-view/" + e.data.runId);
 }
 

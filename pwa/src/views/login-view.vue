@@ -13,22 +13,12 @@
       </p>
       <div v-else class="error-text-height"></div>
       <div class="center-div">
-      <Button
-        label="Login"
-        value="Login"
-        class="p-button-success left-button"
-        @click="attemptLogin"
-      />
-      <Button
-        label="Register"
-        value="Register"
-        class="p-button-success p-button-outlined right-button"
-        @click="router.push('/register-view')"
-      />
+        <Button label="Login" value="Login" class="p-button-success left-button" @click="attemptLogin" />
+        <Button label="Register" value="Register" class="p-button-success p-button-outlined right-button" @click="router.push('/register-view')" />
       </div>
     </template>
     <template #footer>
-      <p class="center-text version-text">Version: 03/04 08:22</p>
+      <p class="center-text version-text">Version: 22.04.05.1112</p>
     </template>
   </Card>
 </template>
@@ -49,10 +39,7 @@ var refErrorDiv = ref("");
 async function attemptLogin() {
   let user = { username: refUsername.value, password: refPassword.value };
   try {
-    let response = await axios.post(
-      process.env.VUE_APP_API_URL + "api/User/Login",
-      user
-    );
+    let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
     store.state.user.token = response.data;
     localStorage.setItem("jwtToken", response.data);
     console.log(store.state.user);

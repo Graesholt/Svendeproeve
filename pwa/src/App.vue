@@ -10,19 +10,21 @@ import { useStore } from "vuex";
 const router = useRouter();
 const store = useStore();
 
-var jwtToken = localStorage.getItem("jwtToken")
-store.state.user.token = jwtToken
+var jwtToken = localStorage.getItem("jwtToken");
+store.state.user.token = jwtToken;
 
-   axios
-    .get(process.env.VUE_APP_API_URL + "api/Run", {
-      headers: { Authorization: `Bearer ${jwtToken}` },
-    }).catch((error) => {
-      if (error.response.status == 401) {
+axios
+  .get(process.env.VUE_APP_API_URL + "api/Run", {
+    headers: { Authorization: `Bearer ${jwtToken}` },
+  })
+  .catch((error) => {
+    if (error.response.status == 401) {
       router.push("/");
-      }
-    }).then(() => {
-      console.log("Valid token")
-      });
+    }
+  })
+  .then(() => {
+    console.log("Valid token");
+  });
 </script>
 
 <style>
@@ -46,28 +48,28 @@ body {
   margin-right: auto;
 }
 
-.center-div{
+.center-div {
   display: flex;
   justify-content: center;
 }
 
 .card-title {
-margin-top: 20px;
-margin-bottom: 0px;
+  margin-top: 20px;
+  margin-bottom: 0px;
 }
 
 .left-button {
-width: 20%;
-min-width: 100px;
-margin-left: auto !important;
-margin-right: 5% !important;
+  width: 20%;
+  min-width: 100px;
+  margin-left: auto !important;
+  margin-right: 5% !important;
 }
 
 .right-button {
-width: 20%;
-min-width: 100px;
-margin-left: 5% !important;
-margin-right: auto !important;
+  width: 20%;
+  min-width: 100px;
+  margin-left: 5% !important;
+  margin-right: auto !important;
 }
 
 .p-button.p-button-success {
