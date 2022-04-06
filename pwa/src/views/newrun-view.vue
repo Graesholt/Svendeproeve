@@ -21,10 +21,8 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 
 const router = useRouter();
-const store = useStore();
 
 var refStartRunButton = ref("");
 var refStartRunButtonClass = ref("");
@@ -79,7 +77,7 @@ function createMap() {
       console.log("point", point);
       //PostPoint
       if (status == "run started" || status == "running") {
-        axios.post(process.env.VUE_APP_API_URL + "api/Point/NewPoint/" + runId, point, { headers: { Authorization: `Bearer ${store.state.user.token}` } });
+        axios.post(process.env.VUE_APP_API_URL + "api/Point/NewPoint/" + runId, point, { headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` } });
         runPolyline.addLatLng(new L.LatLng(position.coords.latitude, position.coords.longitude));
         if (status == "run started") {
           status = "running";

@@ -2,13 +2,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
-import store from './store'
 import PrimeVue from 'primevue/config';
 import VueChartkick from 'vue-chartkick'
 import 'chartkick/chart.js'
 
 const app = createApp(App);
-app.use(store);
 app.use(router);
 app.use(PrimeVue);
 app.use(VueChartkick)

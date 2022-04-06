@@ -5,6 +5,11 @@ namespace WebAPI.Context
 {
     public class DatabaseContext : DbContext
     {
+        public DatabaseContext()
+        {
+
+        }
+
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
 
@@ -12,7 +17,7 @@ namespace WebAPI.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=RunDB;Integrated Security=True;");
+            //optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=RunDB;Integrated Security=True;");
         }
 
         public DbSet<User> Users { get; set; }

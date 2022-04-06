@@ -27,10 +27,8 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 
 const router = useRouter();
-const store = useStore();
 
 var refUsername = ref("");
 var refPassword = ref("");
@@ -40,10 +38,8 @@ async function attemptLogin() {
   let user = { username: refUsername.value, password: refPassword.value };
   try {
     let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
-    store.state.user.token = response.data;
-    store.state.user.username = refUsername.value;
     localStorage.setItem("jwtToken", response.data);
-    console.log(store.state.user);
+    localStorage.setItem("username", refUsername.value);
     router.push("/runs-view");
   } catch (exception) {
     console.log(exception);

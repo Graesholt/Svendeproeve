@@ -66,10 +66,8 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 
 const router = useRouter();
-const store = useStore();
 
 var refHeader = ref("");
 var refRun = ref([]);
@@ -97,7 +95,7 @@ refRun.value.avgSpeedInMetersPerSecond = "0";
 
 axios
   .get(process.env.VUE_APP_API_URL + "api/Run/" + router.currentRoute.value.params.runId, {
-    headers: { Authorization: `Bearer ${store.state.user.token}` },
+    headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
   })
   .then(function (response) {
     console.log(response.data);

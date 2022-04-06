@@ -48,9 +48,22 @@ namespace WebAPI.Controllers
                 return NotFound("User info not correct");
             }
 
-            string key = configuration.GetValue<string>("Jwt:Key"); //Secret key which will be used later during validation
-            var issuer = configuration.GetValue<string>("Jwt:Issuer"); //normally this will be your site URL
-            var audience = configuration.GetValue<string>("Jwt:Audience");
+            //Move to constructor?
+            string key;
+            string issuer;
+            string audience;
+            if (configuration == null)
+            {
+                key = "FunRun_testing_420_69";
+                issuer = "FunRunTesting";
+                audience = "FunRunTesting";
+            }
+            else
+            {
+                key = configuration.GetValue<string>("Jwt:Key"); //Secret key which will be used later during validation
+                issuer = configuration.GetValue<string>("Jwt:Issuer"); //normally this will be your site URL
+                audience = configuration.GetValue<string>("Jwt:Audience");
+            }
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

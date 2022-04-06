@@ -5,21 +5,17 @@
 <script setup>
 import axios from "axios";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 
 const router = useRouter();
-const store = useStore();
-
-var jwtToken = localStorage.getItem("jwtToken");
-store.state.user.token = jwtToken;
 
 axios
   .get(process.env.VUE_APP_API_URL + "api/Run", {
-    headers: { Authorization: `Bearer ${jwtToken}` },
+    headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
   })
   .catch((error) => {
     if (error.response.status == 401) {
       localStorage.setItem("jwtToken", "");
+      localStorage.setItem("username", "");
       router.push("/");
     }
   })

@@ -43,10 +43,8 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 
 const router = useRouter();
-const store = useStore();
 
 var refUsernamePossesive = ref("");
 var refRuns = ref("");
@@ -56,7 +54,7 @@ var refDateTo = ref("");
 var refDatatableEmptyText = ref();
 
 //Small bit of code to construct danish possessive correctly
-refUsernamePossesive.value = store.state.user.username;
+refUsernamePossesive.value = localStorage.getItem("username");
 var lastLetterInUsername = refUsernamePossesive.value.charAt(refUsernamePossesive.value.length - 1);
 if ((lastLetterInUsername == "s") || (lastLetterInUsername == "x") || (lastLetterInUsername == "z")) {
   refUsernamePossesive.value += "'";
@@ -81,7 +79,7 @@ getRuns();
 function getRuns() {
   axios
     .get(process.env.VUE_APP_API_URL + "api/Run", {
-      headers: { Authorization: `Bearer ${store.state.user.token}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     })
     .then(function (response) {
       console.log(response.data);
@@ -91,9 +89,8 @@ function getRuns() {
 }
 
 function logOut() {
-  store.state.user.token = "";
-  store.state.user.username = "";
   localStorage.setItem("jwtToken", "");
+  localStorage.setItem("username", "");
   router.push("/");
 }
 
@@ -126,7 +123,7 @@ function viewRun(e) {
 function deleteRun(slotProps) {
   axios
     .delete(process.env.VUE_APP_API_URL + "api/Run/" + slotProps.data.runId, {
-      headers: { Authorization: `Bearer ${store.state.user.token}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     })
     .then(function (response) {
       getRuns();
