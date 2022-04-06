@@ -1,7 +1,20 @@
 <template>
-  <div id="new-run-map"></div>
-  <p>{{ refTimer.hours }}:{{ refTimer.minutes }}:{{ refTimer.seconds }}</p>
-  <input type="button" v-model="refStartRunButton" @click="refButtonAction" />
+  <Card>
+    <template #title>
+      <p class="center-text card-title">Ny løbetur</p>
+    </template>
+    <template #content>
+      <br />
+      <div id="new-run-map"></div>
+      <br />
+      <p class="center-text timer-text">{{ refTimer.hours }}:{{ refTimer.minutes }}:{{ refTimer.seconds }}</p>
+      <br />
+      <div class="center-div">
+        <Button :label="refStartRunButton" @click="runButton()" :class="refStartRunButtonClass" />
+      </div>
+    </template>
+    <template #footer> </template>
+  </Card>
 </template>
 
 <script async setup>
@@ -14,16 +27,17 @@ const router = useRouter();
 const store = useStore();
 
 var refStartRunButton = ref("");
-var refButtonAction = ref("");
+var refStartRunButtonClass = ref("");
 var refTimer = ref([]);
-refStartRunButton.value = "Start Løbetur";
-refButtonAction.value = newRun;
-var running = false;
+var status = "ready";
 var runId;
 var startTime;
 var watchId;
 var timerInterval;
 var lock;
+
+refStartRunButton.value = "Start løbetur";
+refStartRunButtonClass.value = "p-button-success";
 
 refTimer.value.hours = "00";
 refTimer.value.minutes = "00";
@@ -64,9 +78,16 @@ function createMap() {
       };
       console.log("point", point);
       //PostPoint
-      if (running == true) {
+      if (status == "run started" || status == "running") {
         axios.post(process.env.VUE_APP_API_URL + "api/Point/NewPoint/" + runId, point, { headers: { Authorization: `Bearer ${store.state.user.token}` } });
         runPolyline.addLatLng(new L.LatLng(position.coords.latitude, position.coords.longitude));
+        if (status == "run started") {
+          status = "running";
+          timerInterval = setInterval(updateTimer, 10);
+        }
+
+        refStartRunButton.value = "Stop løbetur";
+        refStartRunButtonClass.value = "p-button-danger";
       }
       //MoveMap
       map.panTo(new L.LatLng(position.coords.latitude, position.coords.longitude));
@@ -77,9 +98,11 @@ function createMap() {
   );
 }
 
-async function newRun() {
-  refButtonAction.value = fisk;
-  if (running == false) {
+async function runButton() {
+  if (status == "ready") {
+    status = "starting run";
+    refStartRunButton.value = "Starter løbetur";
+    refStartRunButtonClass.value = "p-button-secondary";
     await axios
       .post(process.env.VUE_APP_API_URL + "api/Run/NewRun", "", {
         headers: { Authorization: `Bearer ${store.state.user.token}` },
@@ -90,9 +113,7 @@ async function newRun() {
         startTime = Date.now();
         console.log(runId);
         //GetPoint
-        running = true;
-        refStartRunButton.value = "Stop Løbetur";
-        timerInterval = setInterval(updateTimer, 10);
+        status = "run started";
         //Test if wakeLock exists. Will fail on many traditional computers, but not devices such as phones.
         if ("wakeLock" in navigator) {
           try {
@@ -103,8 +124,8 @@ async function newRun() {
           }
         }
       });
-  } else if (running == true) {
-    running = false;
+  } else if (status == "running") {
+    status = "done";
     navigator.geolocation.clearWatch(watchId);
     clearInterval(timerInterval);
     if ("wakeLock" in navigator) {
@@ -119,28 +140,36 @@ function updateTimer() {
   refTimer.value.hours = Math.floor(timer / 1000 / 60 / 60);
   refTimer.value.minutes = Math.floor((timer - refTimer.value.hours * 1000 * 60 * 60) / 1000 / 60);
   refTimer.value.seconds = Math.floor((timer - refTimer.value.hours * 1000 * 60 * 60 - refTimer.value.minutes * 1000 * 60) / 1000);
-  if(refTimer.value.hours < 10)
-  {
+  if (refTimer.value.hours < 10) {
     refTimer.value.hours = "0" + refTimer.value.hours;
   }
-  if(refTimer.value.minutes < 10)
-  {
+  if (refTimer.value.minutes < 10) {
     refTimer.value.minutes = "0" + refTimer.value.minutes;
   }
-  if(refTimer.value.seconds < 10)
-  {
+  if (refTimer.value.seconds < 10) {
     refTimer.value.seconds = "0" + refTimer.value.seconds;
   }
-}
-
-function fisk() {
-  console.log("fisk")
 }
 </script>
 
 <style scoped>
+.p-card {
+  margin: auto;
+  min-width: 350px;
+  width: 50%;
+
+  margin-top: 5vh;
+}
+
 #new-run-map {
   height: 50vh;
   width: 100%;
+}
+
+.timer-text {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 </style>

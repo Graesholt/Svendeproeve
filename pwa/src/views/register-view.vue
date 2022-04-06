@@ -1,15 +1,15 @@
 <template>
   <Card>
     <template #title>
-      <p class="center-text card-title">Register</p>
+      <p class="center-text card-title">Registrer</p>
     </template>
     <template #content>
       <p class="center-text">Brugernavn</p>
-      <InputText type="text" class="center-input-field" v-model="refUsername" name="Username" />
+      <InputText type="text" class="center-input-field" v-model="refUsername" name="Username" v-on:keyup.enter="attemptRegistration"/>
       <p class="center-text">Kodeord</p>
-      <InputText type="password" class="center-input-field" v-model="refPassword" name="Password" />
+      <InputText type="password" class="center-input-field" v-model="refPassword" name="Password" v-on:keyup.enter="attemptRegistration"/>
       <p class="center-text">Gentag kodeord</p>
-      <InputText type="password" class="center-input-field" v-model="refPasswordConfirm" name="PasswordConfirm" />
+      <InputText type="password" class="center-input-field" v-model="refPasswordConfirm" name="PasswordConfirm" v-on:keyup.enter="attemptRegistration"/>
       <p v-if="refErrorDiv" class="error-text-height error-text center-text">
         {{ refErrorDiv }}
       </p>
@@ -27,6 +27,7 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+
 const router = useRouter();
 
 var refUsername = ref("");
@@ -65,7 +66,6 @@ async function attemptRegistration() {
   margin: auto;
   width: 50%;
   min-width: 300px;
-  /*padding: 10px;*/
 
   margin-top: 15vh;
 }

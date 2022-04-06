@@ -46,8 +46,13 @@ namespace WebAPI.Controllers
         [HttpGet("{runId}")]
         public async Task<ActionResult<RunStats>> GetRun(int runId)
         {
-            var run = await _context.Runs.Include("points").FirstOrDefaultAsync(r => r.runId == runId);
+            var run = await _context.Runs.Include("user").Include("points").FirstOrDefaultAsync(r => r.runId == runId);
             //.Include("points") gets a list of points associated with this run as a property on the object.
+
+            if (run.user.userId != GetUserId())
+            {
+                return Unauthorized();
+            }
 
             if (run == null)
             {

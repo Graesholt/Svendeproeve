@@ -2,7 +2,7 @@
   <Card>
     <template #title>
       <p class="center-text card-title">
-        {{ new Date(refRun.dateTime).toLocaleDateString() + " - " + new Date(refRun.dateTime).toLocaleTimeString() }}
+        {{ refHeader }}
       </p>
     </template>
     <template #content>
@@ -48,11 +48,14 @@
         </Card>
       </div>
 
-      <p>Gennemsnitshastighedsskema</p>
-
-      <p class="center-text">Højdekurve</p>
+      <p class="center-text chart-header">Gennemsnitshastighed pr. minut</p>
       <div class="center-div scheme-div">
-        <line-chart :data="refAltitudePointList" xtitle="Tid" ytitle="Højde i m" class="scheme" :curve="false" :points="false" :min="refAltitudeSchemeMin" :max="refAltitudeSchemeMax"></line-chart>
+        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAvgSpeedPerMinuteSchemeMin" :max="refAvgSpeedPerMinuteSchemeMax" :xmin="1" :xmax="refAvgSpeedPerMinuteSchemeLength" :colors="['#ff6600']"></line-chart>
+      </div>
+
+      <p class="center-text chart-header">Højdekurve</p>
+      <div class="center-div scheme-div">
+        <line-chart :data="refAltitudePointList" xtitle="Tid" ytitle="Højde i m" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAltitudeSchemeMin" :max="refAltitudeSchemeMax"></line-chart>
       </div>
     </template>
     <template #footer> </template>
@@ -68,15 +71,29 @@ import { useStore } from "vuex";
 const router = useRouter();
 const store = useStore();
 
-var refRun = ref("");
-var refAltitudePointList = ref([]);
+var refHeader = ref("");
+var refRun = ref([]);
 
 var refDurationMilliseconds = ref();
 var refDistanceUnit = ref();
 
+var refAvgSpeedPerMinutePointList = ref([]);
+var refAvgSpeedPerMinuteSchemeLength = ref();
+var refAvgSpeedPerMinuteSchemeMin = ref();
+var refAvgSpeedPerMinuteSchemeMax = ref();
+var AvgSpeedPerMinuteSchemeMargin = 2;
+
+var refAltitudePointList = ref([]);
 var refAltitudeSchemeMin = ref();
 var refAltitudeSchemeMax = ref();
 var AltitudeSchemeMargin = 2;
+
+refHeader.value = "Henter data...";
+refRun.value.duration = "00:00:00";
+refDurationMilliseconds.value = "00";
+refRun.value.distance = "0";
+refDistanceUnit.value = "m";
+refRun.value.avgSpeedInMetersPerSecond = "0";
 
 axios
   .get(process.env.VUE_APP_API_URL + "api/Run/" + router.currentRoute.value.params.runId, {
@@ -85,6 +102,7 @@ axios
   .then(function (response) {
     console.log(response.data);
     refRun.value = response.data;
+    refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString() + " - " + new Date(refRun.value.dateTime).toLocaleTimeString();
 
     console.log(refRun.value.centerLatitude);
     var map = L.map("run-map").setView(new L.LatLng(refRun.value.centerLatitude, refRun.value.centerLongitude), 14);
@@ -99,6 +117,7 @@ axios
     refAltitudePointList.value = [];
     refRun.value.points.forEach((element) => {
       mapPointList.push(new L.LatLng(element.latitude, element.longitude));
+
       if (refAltitudePointList.value.length == 0 || roundToTwo(element.altitude) != refAltitudePointList.value[refAltitudePointList.value.length - 1][1]) {
         refAltitudePointList.value.push([new Date(element.dateTime).toLocaleTimeString(), roundToTwo(element.altitude)]);
         if (!refAltitudeSchemeMin.value || element.altitude < refAltitudeSchemeMin.value) {
@@ -112,6 +131,20 @@ axios
     console.log(refAltitudePointList);
     refAltitudeSchemeMin.value = Math.round(refAltitudeSchemeMin.value - AltitudeSchemeMargin);
     refAltitudeSchemeMax.value = Math.round(refAltitudeSchemeMax.value + AltitudeSchemeMargin);
+
+    for (let i = 0; i < refRun.value.avgSpeedPerMinuteInMetersPerSecond.length; i++) {
+      refAvgSpeedPerMinutePointList.value.push([i + 1, roundToTwo(refRun.value.avgSpeedPerMinuteInMetersPerSecond[i])]);
+      if (!refAvgSpeedPerMinuteSchemeMin.value || refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] < refAvgSpeedPerMinuteSchemeMin.value) {
+        refAvgSpeedPerMinuteSchemeMin.value = refRun.value.avgSpeedPerMinuteInMetersPerSecond[i];
+      }
+      if (!refAvgSpeedPerMinuteSchemeMax.value || refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] > refAvgSpeedPerMinuteSchemeMax.value) {
+        refAvgSpeedPerMinuteSchemeMax.value = refRun.value.avgSpeedPerMinuteInMetersPerSecond[i];
+      }
+    }
+    console.log(refAvgSpeedPerMinutePointList);
+    refAvgSpeedPerMinuteSchemeLength.value = refRun.value.avgSpeedPerMinuteInMetersPerSecond.length;
+    refAvgSpeedPerMinuteSchemeMin.value = Math.round(refAvgSpeedPerMinuteSchemeMin.value - AvgSpeedPerMinuteSchemeMargin);
+    refAvgSpeedPerMinuteSchemeMax.value = Math.round(refAvgSpeedPerMinuteSchemeMax.value + AvgSpeedPerMinuteSchemeMargin);
 
     var runPolyline = new L.Polyline(mapPointList, {
       color: "blue",
@@ -151,6 +184,12 @@ axios
     }
 
     refRun.value.avgSpeedInMetersPerSecond = roundToTwo((refRun.value.avgSpeedInMetersPerSecond * 3600) / 1000);
+  }).catch((exception) => {
+    console.log(exception.response.status)
+    if (exception.response.status == 401)
+    {
+      refHeader.value = "Ugyldigt runId!"
+    }
   });
 
 //Math.round() can NOT take a number of decimals to round to in JavaScript.
@@ -187,8 +226,15 @@ function roundToTwo(num) {
   margin: 0px;
 }
 
+.chart-header {
+  font-size: 20px;
+  font-weight: 600;
+}
+
 .scheme {
   max-width: 100%;
   width: 100%;
+  min-height: 150px;
+  max-height: 10vw;
 }
 </style>

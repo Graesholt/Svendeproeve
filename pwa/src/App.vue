@@ -19,6 +19,7 @@ axios
   })
   .catch((error) => {
     if (error.response.status == 401) {
+      localStorage.setItem("jwtToken", "");
       router.push("/");
     }
   })
@@ -103,9 +104,5 @@ body {
 
 .error-text {
   color: red;
-}
-
-.version-text {
-  color: lightgrey;
 }
 </style>

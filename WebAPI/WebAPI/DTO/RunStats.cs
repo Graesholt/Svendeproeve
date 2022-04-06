@@ -53,10 +53,54 @@ namespace WebAPI.DTO
             duration = run.points.Last().dateTime.Subtract(run.dateTime);
 
             //Average Speed
-            avgSpeedInMetersPerSecond = (distance / duration.TotalSeconds);
+            avgSpeedInMetersPerSecond = distance / duration.TotalSeconds;
 
             //Average Speed pr minute (for chart)
             avgSpeedPerMinuteInMetersPerSecond = new List<double>();
+            avgSpeedPerMinuteInMetersPerSecond.Add(0);
+            int minute = 1;
+            int restPrecisionFactor = 100;
+            for (int i1 = 0; i1 < run.points.Count() - 1; i1++)
+            {
+                if (run.points[i1 + 1].dateTime < run.dateTime.AddMinutes(minute))
+                {
+                    avgSpeedPerMinuteInMetersPerSecond[minute - 1] += latLongDistanceiInMeters(run.points[i1].latitude, run.points[i1].longitude, run.points[i1 + 1].latitude, run.points[i1 + 1].longitude);
+                }
+                else
+                {
+                    //Calculate leftover, put rest in next minute
+                    avgSpeedPerMinuteInMetersPerSecond.Insert(minute, 0);
+
+                    TimeSpan restTime = (run.points[i1 + 1].dateTime - run.points[i1].dateTime) / restPrecisionFactor;
+                    double restDistance = latLongDistanceiInMeters(run.points[i1].latitude, run.points[i1].longitude, run.points[i1 + 1].latitude, run.points[i1 + 1].longitude) / restPrecisionFactor;
+                    for (int i2 = 1; i2 <= restPrecisionFactor; i2++)
+                    {
+                        if (run.points[i1].dateTime + (i2 * restTime) < run.dateTime.AddMinutes(minute))
+                        {
+                            avgSpeedPerMinuteInMetersPerSecond[minute - 1] += restDistance;
+                        }
+                        else
+                        {
+                            avgSpeedPerMinuteInMetersPerSecond[minute] += restDistance;
+                        }
+                    }
+
+                    minute++;
+                }
+            }
+            for (int i = 0; i < avgSpeedPerMinuteInMetersPerSecond.Count(); i++)
+            {
+                if (i < avgSpeedPerMinuteInMetersPerSecond.Count() - 1)
+                {
+                    avgSpeedPerMinuteInMetersPerSecond[i] = avgSpeedPerMinuteInMetersPerSecond[i] / 60;
+                }
+                else
+                {
+                    //Last minute might not be a whole minute...
+                    //castings to double to force decimal results.
+                    avgSpeedPerMinuteInMetersPerSecond[i] = avgSpeedPerMinuteInMetersPerSecond[i] / ((double)duration.Seconds + ((double)duration.Milliseconds / (double)1000));
+                }
+            }
         }
 
         public double centerLatitude { get; set; }
