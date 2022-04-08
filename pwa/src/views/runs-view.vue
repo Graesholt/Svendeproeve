@@ -25,7 +25,7 @@
       <br />
 
       <div class="center-div">
-        <!-- Inline styling of datatble used because class did not cut it, even with the !important keyword -->
+        <!-- Inline styling of datatble used because css class would not take precedent, even with the !important keyword -->
         <DataTable :value="refRuns" :scrollable="true" style="min-width: 325px; width: 75%" :rowHover="true" @row-click="viewRun($event)" :paginator="true" :rows="10" paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink" responsiveLayout="scroll" :pageLinkSize="1">
           <template #empty>
             <p class="center-text empty-text">{{ refDatatableEmptyText }}</p>
@@ -179,20 +179,4 @@ function deleteRun(slotProps) {
 .datatable-delete-column {
   max-width: 100px;
 }
-
-/* Not working
-.ui-paginator {
-  padding: 0px !important;
-}
-
-.p-paginator-first, .p-paginator-page {
-  min-width: 10px !important;
-}
-
-.p-paginator-bottom {
-  min-width: 400px !important;
-  width: 400px !important;
-  max-width: 400px !important;
-}
-*/
 </style>

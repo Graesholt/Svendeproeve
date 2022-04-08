@@ -48,9 +48,8 @@ function createMap() {
     dragging: false,
   }).setView(new L.LatLng(40.866667, 34.566667), 18);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
-    id: "mapbox/streets-v11",
     tileSize: 256,
   }).addTo(map);
 
