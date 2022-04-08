@@ -9,6 +9,10 @@ namespace WebAPI.DTO
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="run"></param>
         public RunStats(Run run)
         {
             dateTime = run.dateTime;

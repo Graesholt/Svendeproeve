@@ -42,8 +42,15 @@ builder.Services.AddSwaggerGen(option =>
 });
 
 builder.Services.AddControllers();
+//builder.Services.AddDbContext<DatabaseContext>(options =>
+//options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseContext")));
+#if RELEASE
 builder.Services.AddDbContext<DatabaseContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseContext")));
+                    options.UseSqlServer("Server=tcp:svendeproeve.database.windows.net,1433;Initial Catalog=RunDB;Persist Security Info=False;User ID=FunRunAdmin;Password=FDuantRaubnaAsdem6i9n;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
+#else
+builder.Services.AddDbContext<DatabaseContext>(options =>
+                    options.UseSqlServer("Data Source=.;Initial Catalog=RunDB;Integrated Security=True;"));
+#endif
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
