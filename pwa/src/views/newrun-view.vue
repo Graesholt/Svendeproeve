@@ -1,4 +1,5 @@
 <template>
+  <HeaderComponent />
   <Card>
     <template #title>
       <p class="center-text card-title">Ny løbetur</p>
@@ -10,7 +11,7 @@
       <p class="center-text timer-text">{{ refTimer.hours }}:{{ refTimer.minutes }}:{{ refTimer.seconds }}</p>
       <br />
       <div class="center-div">
-        <Button :label="refStartRunButton" @click="runButton()" :class="refStartRunButtonClass" />
+        <Button :label="refStartRunButton" @click="runButton()" class="" v-bind:class="{ 'p-button-success': status == 'ready', 'p-button-secondary': status == 'starting run' || status == 'run started', 'p-button-danger': status === 'running' }" />
       </div>
     </template>
     <template #footer> </template>
@@ -19,15 +20,15 @@
 
 <script async setup>
 import axios from "axios";
-import { ref } from "vue";
+import { onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 
 var refStartRunButton = ref("");
-var refStartRunButtonClass = ref("");
 var refTimer = ref([]);
-var status = "ready";
+var status =  ref("");
+status.value = "ready";
 var runId;
 var startTime;
 var watchId;
@@ -35,7 +36,6 @@ var timerInterval;
 var lock;
 
 refStartRunButton.value = "Start løbetur";
-refStartRunButtonClass.value = "p-button-success";
 
 refTimer.value.hours = "00";
 refTimer.value.minutes = "00";
@@ -43,7 +43,10 @@ refTimer.value.seconds = "00";
 
 setTimeout(createMap, 100); //Timeout used to make sure HTML is generated before map tries to interact with it.
 function createMap() {
-  var map = L.map("new-run-map").setView(new L.LatLng(40.866667, 34.566667), 19);
+  var map = L.map("new-run-map", {
+    zoomControl: false,
+    dragging: false,
+  }).setView(new L.LatLng(40.866667, 34.566667), 18);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 19,
@@ -76,16 +79,14 @@ function createMap() {
       };
       console.log("point", point);
       //PostPoint
-      if (status == "run started" || status == "running") {
-        axios.post(process.env.VUE_APP_API_URL + "api/Point/NewPoint/" + runId, point, { headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` } });
+      if (status.value == "run started" || status.value == "running") {
+        axios.post(process.env.VUE_APP_API_URL + "api/Point/" + runId, point, { headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` } });
         runPolyline.addLatLng(new L.LatLng(position.coords.latitude, position.coords.longitude));
-        if (status == "run started") {
-          status = "running";
+        if (status.value == "run started") {
+          status.value = "running";
           timerInterval = setInterval(updateTimer, 10);
+          refStartRunButton.value = "Stop løbetur";
         }
-
-        refStartRunButton.value = "Stop løbetur";
-        refStartRunButtonClass.value = "p-button-danger";
       }
       //MoveMap
       map.panTo(new L.LatLng(position.coords.latitude, position.coords.longitude));
@@ -97,13 +98,12 @@ function createMap() {
 }
 
 async function runButton() {
-  if (status == "ready") {
-    status = "starting run";
+  if (status.value == "ready") {
+    status.value = "starting run";
     refStartRunButton.value = "Starter løbetur";
-    refStartRunButtonClass.value = "p-button-secondary";
     await axios
-      .post(process.env.VUE_APP_API_URL + "api/Run/NewRun", "", {
-        headers: { Authorization: `Bearer ${store.state.user.token}` },
+      .post(process.env.VUE_APP_API_URL + "api/Run", "", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
       })
       .then(async function (response) {
         console.log(response.data);
@@ -111,7 +111,7 @@ async function runButton() {
         startTime = Date.now();
         console.log(runId);
         //GetPoint
-        status = "run started";
+        status.value = "run started";
         //Test if wakeLock exists. Will fail on many traditional computers, but not devices such as phones.
         if ("wakeLock" in navigator) {
           try {
@@ -122,8 +122,8 @@ async function runButton() {
           }
         }
       });
-  } else if (status == "running") {
-    status = "done";
+  } else if (status.value == "running") {
+    status.value = "done";
     navigator.geolocation.clearWatch(watchId);
     clearInterval(timerInterval);
     if ("wakeLock" in navigator) {
@@ -148,6 +148,14 @@ function updateTimer() {
     refTimer.value.seconds = "0" + refTimer.value.seconds;
   }
 }
+
+onUnmounted(async () => {
+  navigator.geolocation.clearWatch(watchId);
+  clearInterval(timerInterval);
+  if ("wakeLock" in navigator) {
+    await lock.release();
+  }
+});
 </script>
 
 <style scoped>
@@ -155,8 +163,6 @@ function updateTimer() {
   margin: auto;
   min-width: 350px;
   width: 50%;
-
-  margin-top: 5vh;
 }
 
 #new-run-map {

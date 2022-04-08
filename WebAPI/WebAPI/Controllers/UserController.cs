@@ -38,7 +38,7 @@ namespace WebAPI.Controllers
         /// <returns></returns>
         // GET: api/User/5
         [HttpPost("Login")]
-        public async Task<ActionResult<User>> GetUser(User loginUser)
+        public async Task<ActionResult<User>> LoginUser(User loginUser)
         {
             //var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginUser.Username);
             var user = (await _context.Users.Where(u => u.username == loginUser.username).ToListAsync()).FirstOrDefault(u => u.username == loginUser.username); //Case sensitivity hack
@@ -48,22 +48,9 @@ namespace WebAPI.Controllers
                 return NotFound("User info not correct");
             }
 
-            //Move to constructor?
-            string key;
-            string issuer;
-            string audience;
-            if (configuration == null)
-            {
-                key = "FunRun_testing_420_69";
-                issuer = "FunRunTesting";
-                audience = "FunRunTesting";
-            }
-            else
-            {
-                key = configuration.GetValue<string>("Jwt:Key"); //Secret key which will be used later during validation
-                issuer = configuration.GetValue<string>("Jwt:Issuer"); //normally this will be your site URL
-                audience = configuration.GetValue<string>("Jwt:Audience");
-            }
+            string key = configuration.GetValue<string>("Jwt:Key"); //Secret key which will be used later during validation
+            string issuer = configuration.GetValue<string>("Jwt:Issuer"); //normally this will be your site URL
+            string audience = configuration.GetValue<string>("Jwt:Audience");
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

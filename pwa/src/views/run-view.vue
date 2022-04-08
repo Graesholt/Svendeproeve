@@ -1,4 +1,5 @@
 <template>
+  <HeaderComponent />
   <Card>
     <template #title>
       <p class="center-text card-title">
@@ -9,11 +10,8 @@
       <div class="center-div">
         <Button label="Tilbage" value="Tilbage" class="p-button-success" @click="router.push('/runs-view')" />
       </div>
-      <br />
-      <div id="run-map"></div>
-      <br />
 
-      <div class="center-div">
+      <div class="center-div top-stat-div">
         <Card class="center-text stat-card">
           <template #title>
             <p class="stat-card-field">
@@ -37,7 +35,7 @@
         </Card>
       </div>
 
-      <div class="center-div">
+      <div class="center-div bottom-stat-div">
         <Card class="center-text stat-card">
           <template #title>
             <p class="stat-card-field">{{ refRun.avgSpeedInMetersPerSecond }}<span class="subscript">km/t</span></p>
@@ -48,14 +46,16 @@
         </Card>
       </div>
 
-      <p class="center-text chart-header">Gennemsnitshastighed pr. minut</p>
-      <div class="center-div scheme-div">
-        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAvgSpeedPerMinuteSchemeMin" :max="refAvgSpeedPerMinuteSchemeMax" :xmin="1" :xmax="refAvgSpeedPerMinuteSchemeLength" :colors="['#ff6600']"></line-chart>
-      </div>
+      <div id="run-map"></div>  
 
       <p class="center-text chart-header">Højdekurve</p>
       <div class="center-div scheme-div">
         <line-chart :data="refAltitudePointList" xtitle="Tid" ytitle="Højde i m" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAltitudeSchemeMin" :max="refAltitudeSchemeMax"></line-chart>
+      </div>
+
+      <p class="center-text chart-header">Gennemsnitshastighed pr. minut</p>
+      <div class="center-div scheme-div">
+        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAvgSpeedPerMinuteSchemeMin" :max="refAvgSpeedPerMinuteSchemeMax" :xmin="1" :xmax="refAvgSpeedPerMinuteSchemeLength" :colors="['#ff6600']"></line-chart>
       </div>
     </template>
     <template #footer> </template>
@@ -131,12 +131,13 @@ axios
     refAltitudeSchemeMax.value = Math.round(refAltitudeSchemeMax.value + AltitudeSchemeMargin);
 
     for (let i = 0; i < refRun.value.avgSpeedPerMinuteInMetersPerSecond.length; i++) {
-      refAvgSpeedPerMinutePointList.value.push([i + 1, roundToTwo(refRun.value.avgSpeedPerMinuteInMetersPerSecond[i])]);
-      if (!refAvgSpeedPerMinuteSchemeMin.value || refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] < refAvgSpeedPerMinuteSchemeMin.value) {
-        refAvgSpeedPerMinuteSchemeMin.value = refRun.value.avgSpeedPerMinuteInMetersPerSecond[i];
+      var speedInKmt = roundToTwo((refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] * 3600) / 1000)
+      refAvgSpeedPerMinutePointList.value.push([i + 1, speedInKmt]);
+      if (!refAvgSpeedPerMinuteSchemeMin.value || speedInKmt < refAvgSpeedPerMinuteSchemeMin.value) {
+        refAvgSpeedPerMinuteSchemeMin.value = speedInKmt;
       }
-      if (!refAvgSpeedPerMinuteSchemeMax.value || refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] > refAvgSpeedPerMinuteSchemeMax.value) {
-        refAvgSpeedPerMinuteSchemeMax.value = refRun.value.avgSpeedPerMinuteInMetersPerSecond[i];
+      if (!refAvgSpeedPerMinuteSchemeMax.value || speedInKmt > refAvgSpeedPerMinuteSchemeMax.value) {
+        refAvgSpeedPerMinuteSchemeMax.value = speedInKmt;
       }
     }
     console.log(refAvgSpeedPerMinutePointList);
@@ -182,11 +183,11 @@ axios
     }
 
     refRun.value.avgSpeedInMetersPerSecond = roundToTwo((refRun.value.avgSpeedInMetersPerSecond * 3600) / 1000);
-  }).catch((exception) => {
-    console.log(exception.response.status)
-    if (exception.response.status == 401)
-    {
-      refHeader.value = "Ugyldigt runId!"
+  })
+  .catch((exception) => {
+    console.log(exception.response.status);
+    if (exception.response.status == 401) {
+      refHeader.value = "Ugyldigt runId!";
     }
   });
 
@@ -209,6 +210,15 @@ function roundToTwo(num) {
   height: 50vh;
   width: 100%;
 }
+
+.top-stat-div {
+margin-top: 10px;
+}
+
+.bottom-stat-div {
+  margin-bottom: 10px;
+}
+
 
 .subscript {
   font-size: 15px;

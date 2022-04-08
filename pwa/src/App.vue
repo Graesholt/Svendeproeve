@@ -101,4 +101,8 @@ body {
 .error-text {
   color: red;
 }
+
+ .leaflet-container{
+    border-radius: 5px;
+    }
 </style>

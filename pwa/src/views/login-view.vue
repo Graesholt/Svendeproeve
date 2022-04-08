@@ -1,4 +1,6 @@
 <template>
+  <HeaderComponent />
+  <p class="center-text page-header-slogan">Have fun in the sun</p>
   <Card>
     <template #title>
       <p class="center-text card-title">Log ind</p>
@@ -14,11 +16,11 @@
       <div v-else class="error-text-height"></div>
       <div class="center-div">
         <Button label="Login" value="Login" class="p-button-success left-button" @click="attemptLogin" />
-        <Button label="Register" value="Registrer" class="p-button-success p-button-outlined right-button" @click="router.push('/register-view')" />
+        <Button label="Registrer" value="Registrer" class="p-button-success p-button-outlined right-button" @click="router.push('/register-view')" />
       </div>
     </template>
     <template #footer>
-      <p class="center-text version-text">Version: 22.04.06.0911</p>
+      <p class="center-text version-text">Version: 22.04.08.1005</p>
     </template>
   </Card>
 </template>
@@ -51,12 +53,27 @@ async function attemptLogin() {
 </script>
 
 <style scoped>
+.page-header {
+margin-top: 34px !important;
+  margin-bottom: 0px !important;
+}
+
+.page-header-slogan {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-style: italic;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #22c55e;
+}
+
 .p-card {
   margin: auto;
   width: 50%;
   min-width: 300px;
 
-  margin-top: 15vh;
+  margin-top: 7vh;
 }
 
 .version-text {

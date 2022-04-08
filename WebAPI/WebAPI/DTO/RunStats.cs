@@ -50,7 +50,11 @@ namespace WebAPI.DTO
             }
 
             //Duration
-            duration = run.points.Last().dateTime.Subtract(run.dateTime);
+            duration = run.points.Last().dateTime.Subtract(run.points.First().dateTime);
+            if (duration != TimeSpan.Zero)
+            {
+                duration = run.points.Last().dateTime.Subtract(run.dateTime);
+            }
 
             //Average Speed
             avgSpeedInMetersPerSecond = distance / duration.TotalSeconds;

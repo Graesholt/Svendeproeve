@@ -1,4 +1,5 @@
 <template>
+  <HeaderComponent />
   <Card>
     <template #title>
       <p class="center-text card-title">{{ refUsernamePossesive }} løbeture</p>
@@ -10,9 +11,16 @@
       </div>
       <br />
 
+      <p class="center-text text-margin">Viser løbeture</p>
       <div class="center-div">
-        <Calendar class="calendar" v-model="refDateFrom" :showIcon="true" @input="updateTable" @date-select="updateTable" dateFormat="dd/mm/yy" />
-        <Calendar class="calendar" v-model="refDateTo" :showIcon="true" @input="updateTable" @date-select="updateTable" dateFormat="dd/mm/yy" />
+        <div>
+          <p class="center-text text-margin calendar-text-margin">Fra</p>
+          <Calendar class="calendar" v-model="refDateFrom" :showIcon="true" @input="updateTable" @date-select="updateTable" dateFormat="dd/mm/yy" />
+        </div>
+        <div>
+          <p class="center-text text-margin calendar-text-margin">Til</p>
+          <Calendar class="calendar" v-model="refDateTo" :showIcon="true" @input="updateTable" @date-select="updateTable" dateFormat="dd/mm/yy" />
+        </div>
       </div>
       <br />
 
@@ -56,24 +64,21 @@ var refDatatableEmptyText = ref();
 //Small bit of code to construct danish possessive correctly
 refUsernamePossesive.value = localStorage.getItem("username");
 var lastLetterInUsername = refUsernamePossesive.value.charAt(refUsernamePossesive.value.length - 1);
-if ((lastLetterInUsername == "s") || (lastLetterInUsername == "x") || (lastLetterInUsername == "z")) {
+if (lastLetterInUsername == "s" || lastLetterInUsername == "x" || lastLetterInUsername == "z") {
   refUsernamePossesive.value += "'";
-}
-else {
+} else {
   refUsernamePossesive.value += "s";
 }
-console.log(lastLetterInUsername)
+console.log(lastLetterInUsername);
 
 //Bliver brugt i stedet for Datatables loading property, fordi jeg synes det er pænere end loading's mørke overlay.
 refDatatableEmptyText.value = "Henter data...";
 
+
 refRuns.value = [];
 refDateFrom.value = new Date(Date.now());
 refDateTo.value = new Date(Date.now());
-refDateFrom.value.setDate(refDateFrom.value.getDate() - 28);
-while (refDateFrom.value.getDate() != refDateTo.value.getDate()) {
-  refDateFrom.value.setDate(refDateFrom.value.getDate() - 1);
-}
+refDateFrom.value.setMonth(refDateFrom.value.getMonth() - 1);
 
 getRuns();
 function getRuns() {
@@ -146,9 +151,19 @@ function deleteRun(slotProps) {
   min-width: 120px;
 }
 
+.text-margin {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.calendar-text-margin {
+  margin-left: 5% !important;
+  margin-right: 100% !important;
+}
+
 .calendar {
-  margin-left: 2% !important;
-  margin-right: 2% !important;
+  margin-left: 5% !important;
+  margin-right: 5% !important;
 }
 
 .empty-text {

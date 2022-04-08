@@ -12,6 +12,9 @@ app.use(PrimeVue);
 app.use(VueChartkick)
 app.mount('#app');
 
+import HeaderComponent from "./components/header.vue";
+app.component('HeaderComponent', HeaderComponent);
+
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 app.component('DataTable', DataTable);

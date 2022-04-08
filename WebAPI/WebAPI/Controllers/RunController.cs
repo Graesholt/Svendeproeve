@@ -71,8 +71,8 @@ namespace WebAPI.Controllers
         /// <returns></returns>
         // POST: api/Run
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("NewRun")]
-        public async Task<ActionResult<Run>> PostRun()
+        [HttpPost]
+        public async Task<ActionResult<Run>> NewRun()
         {
             var run = new Run();
 
@@ -93,9 +93,9 @@ namespace WebAPI.Controllers
         /// <returns></returns>
         // DELETE: api/Run/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRun(int id)
+        public async Task<IActionResult> DeleteRun(int runId)
         {
-            var run = await _context.Runs.FindAsync(id);
+            var run = await _context.Runs.FindAsync(runId);
             if (run == null)
             {
                 return NotFound();

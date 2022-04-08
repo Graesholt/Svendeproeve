@@ -12,155 +12,182 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Net;
 using System.Net.Http;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace UnitTests
 {
     [TestClass]
     public class UnitTest1
     {
+        string url = "http://localhost:5268/";
 
         [TestMethod]
-        public void CreateNewUser()
+        public async Task RegisterUser()
         {
-            UserController userController = UserControllerSetup();
+            HttpClient client = new HttpClient();
 
-            User testUser = new User() { username = "tobitest" + System.DateTime.Now, password = "123qwe123" };
-            ActionResult<User> response = userController.RegisterUser(testUser).Result;
+            User user = new User();
+            user.username = "FunRunTesting" + System.DateTime.Now;
+            user.password = "tqewsetritnygu";
+            var stringContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(url + "api/User/Register", stringContent);
 
-            var result = response.Result as StatusCodeResult;
-            Assert.AreEqual(result.StatusCode, 201);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.Created);
+
+            //Test users following this exact naming scheme are cleaned up by a job running once an hour on the database.
         }
 
         [TestMethod]
-        public void LoginUser()
+        public async Task LoginUser()
         {
-            User testUser = CreateUser();
+            HttpClient client = new HttpClient();
 
-            UserController userController = UserControllerSetup();
+            User user = new User();
+            user.username = "FunRunTesting";
+            user.password = "tqewsetritnygu";
+            var stringContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(url + "api/User/Login", stringContent);
 
-            ActionResult<User> response = userController.GetUser(testUser).Result;
-
-            var result = response.Result as OkObjectResult;
-            Assert.AreEqual(result.StatusCode, 200);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
         }
 
         [TestMethod]
-        public void GetRuns()
+        public async Task GetRuns()
         {
-
-        }
-
-        [TestMethod]
-        public async Task GetRunDataAsync()
-        {
-            User testUser = CreateUser();
-            string token = LoginUser(testUser);
+            Task<string> token = LoginTestUser();
 
             HttpClient client = new HttpClient();
 
-            var url = "http://localhost:5268/api/Run";
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token.Result);
+            HttpResponseMessage response = await client.GetAsync(url + "api/Run");
 
-            client.DefaultRequestHeaders.Add("accept", "text/plain");
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+        }
+
+        [TestMethod]
+        public async Task GetRun()
+        {
+            string token = await LoginTestUser();
+            int runId = await CreateNewRun(token);
+            await CreatePoints(token, runId);
+
+            HttpClient client = new HttpClient();
+
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-            HttpResponseMessage response = await client.GetAsync(url);
-            string responseBody = await response.Content.ReadAsStringAsync();
+            HttpResponseMessage response = await client.GetAsync(url + "api/Run/" + runId);
 
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
         }
 
         [TestMethod]
-        public void CreateNewRun()
+        public async Task NewRun()
         {
-            User testUser = CreateUser();
-            string token = LoginUser(testUser);
-            //var token2 = token.Result.ToString() as JwtSecurityToken;
+            Task<string> token = LoginTestUser();
 
-            RunController runController = RunControllerSetup();
+            HttpClient client = new HttpClient();
 
-            //runController.HttpContext.User.Identity(token);
-            var claims = new List<Claim>();
-            claims.Add(new Claim("userId", "0"));
-            var appidentity = new ClaimsIdentity(claims);
+            var stringContent = new StringContent("");
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token.Result);
+            HttpResponseMessage response = await client.PostAsync(url + "api/Run", stringContent);
 
-            runController.User.AddIdentity(appidentity);
-
-            ActionResult<Run> response = runController.PostRun().Result;
-
-
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.Created);
         }
 
         [TestMethod]
-        public void DeleteRun()
+        public async Task DeleteRun()
         {
+            string token = await LoginTestUser();
+            int runId = await CreateNewRun(token);
+            await CreatePoints(token, runId);
 
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            HttpResponseMessage response = await client.DeleteAsync(url + "api/Run/" + runId);
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.NoContent);
         }
 
         [TestMethod]
-        public void CreatePoint()
+        public async Task NewPoint()
         {
+            string token = await LoginTestUser();
+            int runId = await CreateNewRun(token);
 
+            HttpClient client = new HttpClient();
+
+            Point point = new Point();
+            point.latitude = 56.3730402904326;
+            point.longitude = 9.65708833471725;
+            point.altitude = 47;
+            var stringContent = new StringContent(JsonConvert.SerializeObject(point), Encoding.UTF8, "application/json");
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            HttpResponseMessage response = await client.PostAsync(url + "api/Point/" + runId, stringContent);
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.Created);
         }
 
-        private static UserController UserControllerSetup()
+        public async Task<string> LoginTestUser()
         {
-            DatabaseContext databaseContext = DatabaseSetup();
+            HttpClient client = new HttpClient();
 
-            UserController userController = new UserController(databaseContext, null);
-            return userController;
+            var stringContent = new StringContent("{\"username\":\"FunRunTesting\", \"password\":\"tqewsetritnygu\"}", Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(url + "api/User/Login", stringContent);
+            string token = await response.Content.ReadAsStringAsync();
+
+            return token;
         }
 
-        private static RunController RunControllerSetup()
+        public async Task<int> CreateNewRun(string token)
         {
-            DatabaseContext databaseContext = DatabaseSetup();
+            HttpClient client = new HttpClient();
 
-            RunController runController = new RunController(databaseContext);
-            return runController;
+            var stringContent = new StringContent("");
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            HttpResponseMessage response = await client.PostAsync(url + "api/Run", stringContent);
+            Run run = await response.Content.ReadAsAsync<Run>();
+
+            return run.runId;
         }
 
-        private static PointController PointControllerSetup()
+        public async Task CreatePoints(string token, int runId)
         {
-            DatabaseContext databaseContext = DatabaseSetup();
+            Point[] testRoutePoints = new Point[5];
 
-            PointController pointController = new PointController(databaseContext);
-            return pointController;
-        }
+            testRoutePoints[0] = new Point();
+            testRoutePoints[0].latitude = 56.3730402904326;
+            testRoutePoints[0].longitude = 9.65708833471725;
+            testRoutePoints[0].altitude = 47;
 
-        private static DatabaseContext DatabaseSetup()
-        {
-            var connectionstring = "Data Source =.; Initial Catalog = RunDBtest; Integrated Security = True;";
+            testRoutePoints[1] = new Point();
+            testRoutePoints[1].latitude = 56.3728954245536;
+            testRoutePoints[1].longitude = 9.6573206444902;
+            testRoutePoints[1].altitude = 47;
 
-            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-            optionsBuilder.UseSqlServer(connectionstring);
+            testRoutePoints[2] = new Point();
+            testRoutePoints[2].latitude = 56.3730111010834;
+            testRoutePoints[2].longitude = 9.65762616112437;
+            testRoutePoints[2].altitude = 47;
 
-            DatabaseContext databaseContext = new DatabaseContext(optionsBuilder.Options);
-            databaseContext.Database.Migrate();
-            return databaseContext;
-        }
+            testRoutePoints[3] = new Point();
+            testRoutePoints[3].latitude = 56.3731640746466;
+            testRoutePoints[3].longitude = 9.65734211850282;
+            testRoutePoints[3].altitude = 46;
 
-        private static User CreateUser()
-        {
-            UserController userController = UserControllerSetup();
+            testRoutePoints[4] = new Point();
+            testRoutePoints[4].latitude = 56.3730402904326;
+            testRoutePoints[4].longitude = 9.65708638253428;
+            testRoutePoints[4].altitude = 47;
 
-            User user = new User() { username = "tobitest" + System.DateTime.Now, password = "123qwe123" };
-            ActionResult<User> response = userController.RegisterUser(user).Result;
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
 
-            //Reset password after hashing
-            user.password = "123qwe123";
-
-            return user;
-        }
-
-        private static string LoginUser(User user)
-        {
-            UserController userController = UserControllerSetup();
-
-            ActionResult<User> response = userController.GetUser(user).Result;
-            //JwtSecurityToken jwtSecurityToken = response.Value.ToString() as JwtSecurityToken;
-            var result = response.Result;
-            var result2 = result.GetType().GetProperty("Value");
-            var result3 = result2.GetValue(result, null).ToString();
-            var result4 = new JwtSecurityTokenHandler().ReadToken(result3.ToString());
-
-            return result3;
+            foreach (Point point in testRoutePoints)
+            {
+                var stringContent = new StringContent(JsonConvert.SerializeObject(point), Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await client.PostAsync(url + "api/Point/" + runId, stringContent);
+            }
         }
     }
 }
