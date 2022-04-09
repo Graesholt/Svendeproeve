@@ -15,12 +15,12 @@
       </p>
       <div v-else class="error-text-height"></div>
       <div class="center-div">
-        <Button label="Login" value="Login" class="p-button-success left-button" @click="attemptLogin" />
+        <Button label="Log ind" value="Log ind" class="p-button-success left-button" @click="attemptLogin" />
         <Button label="Registrer" value="Registrer" class="p-button-success p-button-outlined right-button" @click="router.push('/register-view')" />
       </div>
     </template>
     <template #footer>
-      <p class="center-text version-text">Version: 22.04.09.1136</p>
+      <p class="center-text version-text">Version: 22.04.09.1820</p>
     </template>
   </Card>
 </template>

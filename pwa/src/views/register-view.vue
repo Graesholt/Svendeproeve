@@ -17,7 +17,7 @@
       <div v-else class="error-text-height"></div>
       <div class="center-div">
         <Button label="Registrer" value="Registrer" class="p-button-success left-button" @click="attemptRegistration" />
-        <Button label="Login" value="Login" class="p-button-success p-button-outlined right-button" @click="router.push('/')" />
+        <Button label="Log ind" value="Log ind" class="p-button-success p-button-outlined right-button" @click="router.push('/')" />
       </div>
     </template>
     <template #footer> </template>
@@ -63,7 +63,7 @@ async function attemptRegistration() {
     await axios.post(process.env.VUE_APP_API_URL + "api/User/Register", user);
     refErrorDivStatus.value = "success";
     refErrorDiv.value = "Bruger registreret!";
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 2500));
     router.push("/");
   } catch (exception) {
     console.log(exception);

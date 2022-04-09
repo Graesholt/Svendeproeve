@@ -68,8 +68,7 @@ function createMap() {
     .setContent("Dig")
     .addTo(map);
 
-  watchId = navigator.geolocation.watchPosition(
-    (position) => {
+  watchId = navigator.geolocation.watchPosition((position) => {
       console.log("position", position);
       let point = {
         longitude: position.coords.longitude,
@@ -80,7 +79,7 @@ function createMap() {
       //PostPoint
       if (status.value == "run started" || status.value == "running") {
         axios.post(process.env.VUE_APP_API_URL + "api/Point/" + runId, point, { headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` } });
-        runPolyline.addLatLng(new L.LatLng(position.coords.latitude, position.coords.longitude));
+        runPolyline.addLatLng(new L.LatLng(point.latitude, point.longitude));
         if (status.value == "run started") {
           status.value = "running";
           timerInterval = setInterval(updateTimer, 10);
@@ -88,8 +87,8 @@ function createMap() {
         }
       }
       //MoveMap
-      map.panTo(new L.LatLng(position.coords.latitude, position.coords.longitude));
-      runnerTooltip.setLatLng(new L.LatLng(position.coords.latitude, position.coords.longitude));
+      map.panTo(new L.LatLng(point.latitude, point.longitude));
+      runnerTooltip.setLatLng(new L.LatLng(point.latitude, point.longitude));
     },
     () => {},
     { enableHighAccuracy: true }
@@ -111,7 +110,7 @@ async function runButton() {
         console.log(runId);
         //GetPoint
         status.value = "run started";
-        //Test if wakeLock exists. Will fail on many traditional computers, but not devices such as phones.
+        //Test if wakeLock exists. Will fail on many traditional computers, but not on devices such as phones.
         if ("wakeLock" in navigator) {
           try {
             lock = await navigator.wakeLock.request("screen");
