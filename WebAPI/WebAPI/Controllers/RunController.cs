@@ -92,7 +92,7 @@ namespace WebAPI.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         // DELETE: api/Run/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{runId}")]
         public async Task<IActionResult> DeleteRun(int runId)
         {
             var run = await _context.Runs.FindAsync(runId);
