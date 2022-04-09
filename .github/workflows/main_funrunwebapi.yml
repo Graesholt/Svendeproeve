@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'FunRunWebAPI'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C0764B5B643746BEBC20CC37A7A1D2A1 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BAF600606B7149EFBD2E9855383B862C }}
           package: .
