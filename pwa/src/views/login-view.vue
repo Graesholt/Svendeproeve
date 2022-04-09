@@ -20,7 +20,7 @@
       </div>
     </template>
     <template #footer>
-      <p class="center-text version-text">Version: 22.04.08.1804</p>
+      <p class="center-text version-text">Version: 22.04.09.1136</p>
     </template>
   </Card>
 </template>
