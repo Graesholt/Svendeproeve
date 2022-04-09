@@ -21,6 +21,11 @@ axios
   })
   .then(() => {
     console.log("Valid token");
+    console.log(router.currentRoute.value.name)
+    if (router.currentRoute.value.name == "login-view" || router.currentRoute.value.name == "register-view")
+    {
+      router.push("/runs-view");
+    }
   });
 </script>
 
