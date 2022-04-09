@@ -45,7 +45,7 @@ namespace WebAPI.Controllers
 
             if ((user == null) || (!BCryptNet.Verify(loginUser.password, user.password)))
             {
-                return NotFound("User info not correct");
+                return NotFound("User info TEST not correct");
             }
 
             string key = configuration.GetValue<string>("Jwt:Key"); //Secret key which will be used later during validation
