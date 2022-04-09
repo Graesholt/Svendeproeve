@@ -7,9 +7,9 @@
     </template>
     <template #content>
       <p class="center-text">Brugernavn</p>
-      <InputText type="text" class="center-input-field" v-model="refUsername" name="Username" v-on:keyup.enter="attemptLogin"/>
+      <InputText type="text" class="center-input-field" v-model="refUsername" name="Username" v-on:keyup.enter="attemptLogin" :disabled="refInputsDisabled" />
       <p class="center-text">Kodeord</p>
-      <InputText type="password" class="center-input-field" v-model="refPassword" name="Password" v-on:keyup.enter="attemptLogin"/>
+      <InputText type="password" class="center-input-field" v-model="refPassword" name="Password" v-on:keyup.enter="attemptLogin" :disabled="refInputsDisabled" />
       <p v-if="refErrorDiv" class="error-text-height error-text center-text">
         {{ refErrorDiv }}
       </p>
@@ -34,9 +34,13 @@ const router = useRouter();
 
 var refUsername = ref("");
 var refPassword = ref("");
+var refInputsDisabled = ref("");
 var refErrorDiv = ref("");
 
+refInputsDisabled.value = false;
+
 async function attemptLogin() {
+  refInputsDisabled.value = true;
   let user = { username: refUsername.value, password: refPassword.value };
   try {
     let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
@@ -47,6 +51,7 @@ async function attemptLogin() {
     console.log(exception);
     if (exception.response.status == 404) {
       refErrorDiv.value = "Ukorrekte brugeroplysninger";
+      refInputsDisabled.value = false;
     }
   }
 }
@@ -54,7 +59,7 @@ async function attemptLogin() {
 
 <style scoped>
 .page-header {
-margin-top: 34px !important;
+  margin-top: 3.5vh !important;
   margin-bottom: 0px !important;
 }
 
