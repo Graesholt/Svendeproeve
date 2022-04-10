@@ -100,7 +100,7 @@ axios
   .then(function (response) {
     console.log(response.data);
     refRun.value = response.data;
-    refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString() + " - " + new Date(refRun.value.dateTime).toLocaleTimeString();
+    refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString('en-GB') + " - " + new Date(refRun.value.dateTime + 'Z').toLocaleTimeString('en-GB');
 
     console.log(refRun.value.centerLatitude);
     var map = L.map("run-map").setView(new L.LatLng(refRun.value.centerLatitude, refRun.value.centerLongitude), 14);
@@ -116,7 +116,7 @@ axios
       mapPointList.push(new L.LatLng(element.latitude, element.longitude));
 
       if (refAltitudePointList.value.length == 0 || roundToTwo(element.altitude) != refAltitudePointList.value[refAltitudePointList.value.length - 1][1]) {
-        refAltitudePointList.value.push([new Date(element.dateTime).toLocaleTimeString(), roundToTwo(element.altitude)]);
+        refAltitudePointList.value.push([new Date(element.dateTime + 'Z').toLocaleTimeString('en-GB'), roundToTwo(element.altitude)]);
         if (!refAltitudeSchemeMin.value || element.altitude < refAltitudeSchemeMin.value) {
           refAltitudeSchemeMin.value = element.altitude;
         }

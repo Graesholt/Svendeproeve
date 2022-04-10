@@ -82,6 +82,7 @@ function createMap() {
         runPolyline.addLatLng(new L.LatLng(point.latitude, point.longitude));
         if (status.value == "run started") {
           status.value = "running";
+          startTime = Date.now();
           timerInterval = setInterval(updateTimer, 10);
           refStartRunButton.value = "Stop løbetur";
         }
@@ -106,7 +107,6 @@ async function runButton() {
       .then(async function (response) {
         console.log(response.data);
         runId = response.data.runId;
-        startTime = Date.now();
         console.log(runId);
         //GetPoint
         status.value = "run started";
