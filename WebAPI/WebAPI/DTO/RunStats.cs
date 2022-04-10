@@ -55,7 +55,7 @@ namespace WebAPI.DTO
 
             //Duration
             duration = run.points.Last().dateTime.Subtract(run.points.First().dateTime);
-            if (duration != TimeSpan.Zero)
+            if (duration == TimeSpan.Zero)
             {
                 duration = run.points.Last().dateTime.Subtract(run.dateTime);
             }

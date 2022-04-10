@@ -127,7 +127,7 @@ async function runButton() {
     if ("wakeLock" in navigator) {
       await lock.release();
     }
-    router.push("/run-view/" + runId);
+    router.push("/run/" + runId);
   }
 }
 

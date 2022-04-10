@@ -8,7 +8,7 @@
     </template>
     <template #content>
       <div class="center-div">
-        <Button label="Tilbage" value="Tilbage" class="p-button-success" @click="router.push('/runs-view')" />
+        <Button label="Tilbage" value="Tilbage" class="p-button-success" @click="router.push('/runs')" />
       </div>
 
       <div class="center-div top-stat-div">
@@ -100,7 +100,7 @@ axios
   .then(function (response) {
     console.log(response.data);
     refRun.value = response.data;
-    refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString('en-GB') + " - " + new Date(refRun.value.dateTime).toLocaleTimeString('en-GB');
+    refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString() + " - " + new Date(refRun.value.dateTime).toLocaleTimeString();
 
     console.log(refRun.value.centerLatitude);
     var map = L.map("run-map").setView(new L.LatLng(refRun.value.centerLatitude, refRun.value.centerLongitude), 14);

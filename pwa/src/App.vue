@@ -13,18 +13,19 @@ axios
     headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
   })
   .catch((error) => {
+    console.log("Caught!");
     if (error.response.status == 401) {
       localStorage.setItem("jwtToken", "");
       localStorage.setItem("username", "");
       router.push("/");
     }
   })
-  .then(() => {
-    console.log("Valid token");
-    console.log(router.currentRoute.value.name)
-    if (router.currentRoute.value.name == "login-view" || router.currentRoute.value.name == "register-view")
-    {
-      router.push("/runs-view");
+  .then((response) => {
+    if (response.status == 200) {
+      console.log("Valid token");
+      if (router.currentRoute.value.name == "login" || router.currentRoute.value.name == "register") {
+        router.push("/runs");
+      }
     }
   });
 </script>
@@ -107,7 +108,7 @@ body {
   color: red;
 }
 
- .leaflet-container{
-    border-radius: 5px;
-    }
+.leaflet-container {
+  border-radius: 5px;
+}
 </style>

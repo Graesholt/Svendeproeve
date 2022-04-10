@@ -6,7 +6,7 @@
     </template>
     <template #content>
       <div class="center-div">
-        <Button label="Ny løbetur" value="Ny løbetur" class="p-button-success left-button" @click="router.push('/newrun-view')" />
+        <Button label="Ny løbetur" value="Ny løbetur" class="p-button-success left-button" @click="router.push('/newrun')" />
         <Button label="Log ud" value="Log ud" class="p-button-danger p-button-outlined right-button" @click="logOut" />
       </div>
       <br />
@@ -32,7 +32,7 @@
           </template>
           <Column field="dateTime" header="Tidspunkt" class="datatable-column" style="min-width: 250px; width: 50%; padding: 8px; padding-left: 16px">
             <template #body="slotProps">
-              <p>{{ new Date(slotProps.data.dateTime).toLocaleDateString('en-GB') + " - " + new Date(slotProps.data.dateTime).toLocaleTimeString('en-GB') }}</p>
+              <p>{{ new Date(slotProps.data.dateTime).toLocaleDateString() + " - " + new Date(slotProps.data.dateTime).toLocaleTimeString() }}</p>
             </template>
           </Column>
           <Column class="datatable-column datatable-delete-column" style="max-width: 56px; padding: 8px">
@@ -122,7 +122,7 @@ function updateTable() {
 
 function viewRun(e) {
   console.log(e.data.runId);
-  router.push("/run-view/" + e.data.runId);
+  router.push("/run/" + e.data.runId);
 }
 
 function deleteRun(slotProps) {

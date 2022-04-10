@@ -16,7 +16,7 @@
       <div v-else class="error-text-height"></div>
       <div class="center-div">
         <Button label="Log ind" value="Log ind" class="p-button-success left-button" @click="attemptLogin" />
-        <Button label="Registrer" value="Registrer" class="p-button-success p-button-outlined right-button" @click="router.push('/register-view')" />
+        <Button label="Registrer" value="Registrer" class="p-button-success p-button-outlined right-button" @click="router.push('/register')" />
       </div>
     </template>
     <template #footer>
@@ -46,7 +46,7 @@ async function attemptLogin() {
     let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
     localStorage.setItem("jwtToken", response.data);
     localStorage.setItem("username", refUsername.value);
-    router.push("/runs-view");
+    router.push("/runs");
   } catch (exception) {
     console.log(exception);
     if (exception.response.status == 404) {

@@ -4,27 +4,27 @@ import login from "../views/login-view.vue";
 const routes = [
   {
     path: "/",
-    name: "login-view",
+    name: "login",
     component: login
 },
 {
-    path: "/register-view",
-    name: "register-view",
+    path: "/register",
+    name: "register",
     component: () => import(/* webpackChunkName: "Runs" */ "../views/register-view.vue")
 },
 {
-    path: "/newrun-view",
-    name: "newrun-view",
+    path: "/newrun",
+    name: "newrun",
     component: () => import(/* webpackChunkName: "Runs" */ "../views/newrun-view.vue")
 },
 {
-    path: "/run-view/:runId",
-    name: "run-view",
+    path: "/run/:runId",
+    name: "run",
     component: () => import(/* webpackChunkName: "Runs" */ "../views/run-view.vue")
 },
 {
-    path: "/runs-view",
-    name: "runs-view",
+    path: "/runs",
+    name: "runs",
     component: () => import(/* webpackChunkName: "Runs" */ "../views/runs-view.vue")
 }
 ]
