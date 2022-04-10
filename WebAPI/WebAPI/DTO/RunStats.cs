@@ -18,34 +18,6 @@ namespace WebAPI.DTO
             dateTime = run.dateTime;
             points = run.points;
 
-            //CenterPoint
-            double northMax = 0;
-            double southMax = 0;
-            double eastMax = 0;
-            double westMax = 0;
-            for (int i = 0; i < run.points.Count(); i++)
-            {
-                if ((run.points[i].latitude > northMax) || (northMax == 0))
-                {
-                    northMax = run.points[i].latitude;
-                }
-                if ((run.points[i].latitude < southMax) || (southMax == 0))
-                {
-                    southMax = run.points[i].latitude;
-                }
-
-                if ((run.points[i].longitude > eastMax) || (eastMax == 0))
-                {
-                    eastMax = run.points[i].longitude;
-                }
-                if ((run.points[i].longitude < westMax) || (westMax == 0))
-                {
-                    westMax = run.points[i].longitude;
-                }
-            }
-            centerLatitude = southMax + ((northMax - southMax) / 2);
-            centerLongitude = westMax + ((eastMax - westMax) / 2);
-
             //Distance
             distance = 0;
             for (int i = 0; i < run.points.Count() - 1; i++)
@@ -110,10 +82,6 @@ namespace WebAPI.DTO
                 }
             }
         }
-
-        public double centerLatitude { get; set; }
-
-        public double centerLongitude { get; set; }
 
         public DateTime dateTime { get; set; }
 

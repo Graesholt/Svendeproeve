@@ -102,17 +102,18 @@ axios
     refRun.value = response.data;
     refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString('en-GB') + " - " + new Date(refRun.value.dateTime + 'Z').toLocaleTimeString('en-GB');
 
-    console.log(refRun.value.centerLatitude);
-    var map = L.map("run-map").setView(new L.LatLng(refRun.value.centerLatitude, refRun.value.centerLongitude), 14);
+    var map = L.map("run-map");
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
       tileSize: 256,
     }).addTo(map);
 
+    var mapLatLngBounds = new L.LatLngBounds();
     var mapPointList = [];
     refAltitudePointList.value = [];
     refRun.value.points.forEach((element) => {
+      mapLatLngBounds.extend(new L.LatLng(element.latitude, element.longitude));
       mapPointList.push(new L.LatLng(element.latitude, element.longitude));
 
       if (refAltitudePointList.value.length == 0 || roundToTwo(element.altitude) != refAltitudePointList.value[refAltitudePointList.value.length - 1][1]) {
@@ -129,20 +130,7 @@ axios
     refAltitudeSchemeMin.value = Math.round(refAltitudeSchemeMin.value - AltitudeSchemeMargin);
     refAltitudeSchemeMax.value = Math.round(refAltitudeSchemeMax.value + AltitudeSchemeMargin);
 
-    for (let i = 0; i < refRun.value.avgSpeedPerMinuteInMetersPerSecond.length; i++) {
-      var speedInKmt = roundToTwo((refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] * 3600) / 1000)
-      refAvgSpeedPerMinutePointList.value.push([i + 1, speedInKmt]);
-      if (!refAvgSpeedPerMinuteSchemeMin.value || speedInKmt < refAvgSpeedPerMinuteSchemeMin.value) {
-        refAvgSpeedPerMinuteSchemeMin.value = speedInKmt;
-      }
-      if (!refAvgSpeedPerMinuteSchemeMax.value || speedInKmt > refAvgSpeedPerMinuteSchemeMax.value) {
-        refAvgSpeedPerMinuteSchemeMax.value = speedInKmt;
-      }
-    }
-    console.log(refAvgSpeedPerMinutePointList);
-    refAvgSpeedPerMinuteSchemeLength.value = refRun.value.avgSpeedPerMinuteInMetersPerSecond.length;
-    refAvgSpeedPerMinuteSchemeMin.value = Math.round(refAvgSpeedPerMinuteSchemeMin.value - AvgSpeedPerMinuteSchemeMargin);
-    refAvgSpeedPerMinuteSchemeMax.value = Math.round(refAvgSpeedPerMinuteSchemeMax.value + AvgSpeedPerMinuteSchemeMargin);
+    map.fitBounds(mapLatLngBounds);
 
     var runPolyline = new L.Polyline(mapPointList, {
       color: "blue",
@@ -182,6 +170,21 @@ axios
     }
 
     refRun.value.avgSpeedInMetersPerSecond = roundToTwo((refRun.value.avgSpeedInMetersPerSecond * 3600) / 1000);
+
+        for (let i = 0; i < refRun.value.avgSpeedPerMinuteInMetersPerSecond.length; i++) {
+      var speedInKmt = roundToTwo((refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] * 3600) / 1000)
+      refAvgSpeedPerMinutePointList.value.push([i + 1, speedInKmt]);
+      if (!refAvgSpeedPerMinuteSchemeMin.value || speedInKmt < refAvgSpeedPerMinuteSchemeMin.value) {
+        refAvgSpeedPerMinuteSchemeMin.value = speedInKmt;
+      }
+      if (!refAvgSpeedPerMinuteSchemeMax.value || speedInKmt > refAvgSpeedPerMinuteSchemeMax.value) {
+        refAvgSpeedPerMinuteSchemeMax.value = speedInKmt;
+      }
+    }
+    console.log(refAvgSpeedPerMinutePointList);
+    refAvgSpeedPerMinuteSchemeLength.value = refRun.value.avgSpeedPerMinuteInMetersPerSecond.length;
+    refAvgSpeedPerMinuteSchemeMin.value = Math.round(refAvgSpeedPerMinuteSchemeMin.value - AvgSpeedPerMinuteSchemeMargin);
+    refAvgSpeedPerMinuteSchemeMax.value = Math.round(refAvgSpeedPerMinuteSchemeMax.value + AvgSpeedPerMinuteSchemeMargin);
   })
   .catch((exception) => {
     console.log(exception.response.status);
