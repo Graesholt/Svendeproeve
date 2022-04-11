@@ -46,7 +46,7 @@
         </Card>
       </div>
 
-      <div id="run-map"></div>  
+      <div id="run-map"></div>
 
       <p class="center-text chart-header">Højdekurve</p>
       <div class="center-div scheme-div">
@@ -55,7 +55,7 @@
 
       <p class="center-text chart-header">Gennemsnitshastighed pr. minut</p>
       <div class="center-div scheme-div">
-        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAvgSpeedPerMinuteSchemeMin" :max="refAvgSpeedPerMinuteSchemeMax" :xmin="1" :xmax="refAvgSpeedPerMinuteSchemeLength" :colors="['#ff6600']"></line-chart>
+        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAvgSpeedPerMinuteSchemeMin" :max="refAvgSpeedPerMinuteSchemeMax" :colors="['#ff6600']"></line-chart>
       </div>
     </template>
     <template #footer> </template>
@@ -69,23 +69,24 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
+//Vue databindings
 var refHeader = ref("");
 var refRun = ref([]);
 
 var refDurationMilliseconds = ref();
 var refDistanceUnit = ref();
 
-var refAvgSpeedPerMinutePointList = ref([]);
-var refAvgSpeedPerMinuteSchemeLength = ref();
-var refAvgSpeedPerMinuteSchemeMin = ref();
-var refAvgSpeedPerMinuteSchemeMax = ref();
-var AvgSpeedPerMinuteSchemeMargin = 2;
-
 var refAltitudePointList = ref([]);
 var refAltitudeSchemeMin = ref();
 var refAltitudeSchemeMax = ref();
 var AltitudeSchemeMargin = 2;
 
+var refAvgSpeedPerMinutePointList = ref([]);
+var refAvgSpeedPerMinuteSchemeMin = ref();
+var refAvgSpeedPerMinuteSchemeMax = ref();
+var AvgSpeedPerMinuteSchemeMargin = 2;
+
+//Temporary data while waiting for database to respond
 refHeader.value = "Henter data...";
 refRun.value.duration = "00:00:00";
 refDurationMilliseconds.value = "00";
@@ -93,6 +94,7 @@ refRun.value.distance = "0";
 refDistanceUnit.value = "m";
 refRun.value.avgSpeedInMetersPerSecond = "0";
 
+//Get run info on page load
 axios
   .get(process.env.VUE_APP_API_URL + "api/Run/" + router.currentRoute.value.params.runId, {
     headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
@@ -100,44 +102,36 @@ axios
   .then(function (response) {
     console.log(response.data);
     refRun.value = response.data;
-    refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString('en-GB') + " - " + new Date(refRun.value.dateTime + 'Z').toLocaleTimeString('en-GB');
+    //Header configured. UTC time converted to locale time
+    refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString("en-GB") + " - " + new Date(refRun.value.dateTime + "Z").toLocaleTimeString("en-GB");
 
+    //Map: creation
     var map = L.map("run-map");
+    //Map: tilelayer configuration
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
       tileSize: 256,
     }).addTo(map);
 
-    var mapLatLngBounds = new L.LatLngBounds();
-    var mapPointList = [];
-    refAltitudePointList.value = [];
+    var mapLatLngBounds = new L.LatLngBounds(); //Holds the bounds we are interesting in viewing on map
+    var mapPointList = []; //Holds the LatLngs of each point of the Run
     refRun.value.points.forEach((element) => {
-      mapLatLngBounds.extend(new L.LatLng(element.latitude, element.longitude));
-      mapPointList.push(new L.LatLng(element.latitude, element.longitude));
-
-      if (refAltitudePointList.value.length == 0 || roundToTwo(element.altitude) != refAltitudePointList.value[refAltitudePointList.value.length - 1][1]) {
-        refAltitudePointList.value.push([new Date(element.dateTime + 'Z').toLocaleTimeString('en-GB'), roundToTwo(element.altitude)]);
-        if (!refAltitudeSchemeMin.value || element.altitude < refAltitudeSchemeMin.value) {
-          refAltitudeSchemeMin.value = element.altitude;
-        }
-        if (!refAltitudeSchemeMax.value || element.altitude > refAltitudeSchemeMax.value) {
-          refAltitudeSchemeMax.value = element.altitude;
-        }
-      }
+      var pointLatLng = new L.LatLng(element.latitude, element.longitude);
+      mapLatLngBounds.extend(pointLatLng);
+      mapPointList.push(pointLatLng);
     });
-    console.log(refAltitudePointList);
-    refAltitudeSchemeMin.value = Math.round(refAltitudeSchemeMin.value - AltitudeSchemeMargin);
-    refAltitudeSchemeMax.value = Math.round(refAltitudeSchemeMax.value + AltitudeSchemeMargin);
 
-    map.fitBounds(mapLatLngBounds);
+    map.fitBounds(mapLatLngBounds); //Sets map bounds
 
+    //Map: polyline configuration
     var runPolyline = new L.Polyline(mapPointList, {
       color: "blue",
       opacity: 0.5,
       smoothFactor: 1.5,
     }).addTo(map);
 
+    //Map: start tooltip configuration
     var startTooltip = L.tooltip({
       direction: "top",
       permanent: true,
@@ -146,6 +140,7 @@ axios
       .setContent("Start")
       .addTo(map);
 
+    //Map: end tooltip configuration
     var endTooltip = L.tooltip({
       direction: "bottom",
       permanent: true,
@@ -154,6 +149,7 @@ axios
       .setContent("Slut")
       .addTo(map);
 
+    //Format duration with correct miliseconds
     var durationSplit = refRun.value.duration.split(".");
     while (durationSplit[1] > 100) {
       durationSplit[1] = durationSplit[1] / 10;
@@ -161,6 +157,7 @@ axios
     refRun.value.duration = durationSplit[0];
     refDurationMilliseconds.value = Math.round(durationSplit[1]);
 
+    //Format distance. If less than 1000m show in m, if over show in km
     if (refRun.value.distance < 1000) {
       refRun.value.distance = Math.round(refRun.value.distance);
       refDistanceUnit.value = "m";
@@ -169,26 +166,45 @@ axios
       refDistanceUnit.value = "km";
     }
 
+    //Format avgSpeedInMetersPerSecond from m/s to km/h
     refRun.value.avgSpeedInMetersPerSecond = roundToTwo((refRun.value.avgSpeedInMetersPerSecond * 3600) / 1000);
 
-        for (let i = 0; i < refRun.value.avgSpeedPerMinuteInMetersPerSecond.length; i++) {
-      var speedInKmt = roundToTwo((refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] * 3600) / 1000)
+    //Configuration of altitude chart
+    refRun.value.points.forEach((element) => {
+      if (refAltitudePointList.value.length == 0 || roundToTwo(element.altitude) != refAltitudePointList.value[refAltitudePointList.value.length - 1][1]) {
+        refAltitudePointList.value.push([new Date(element.dateTime + "Z").toLocaleTimeString("en-GB"), roundToTwo(element.altitude)]);
+        if (!refAltitudeSchemeMin.value || element.altitude < refAltitudeSchemeMin.value) { //Find highest value
+          refAltitudeSchemeMin.value = element.altitude;
+        }
+        if (!refAltitudeSchemeMax.value || element.altitude > refAltitudeSchemeMax.value) { //Find lowest value
+          refAltitudeSchemeMax.value = element.altitude;
+        }
+      }
+    });
+    console.log(refAltitudePointList);
+    //Modify highest and lowest values by AltitudeSchemeMargin to get min and max values of chart
+    refAltitudeSchemeMin.value = Math.round(refAltitudeSchemeMin.value - AltitudeSchemeMargin);
+    refAltitudeSchemeMax.value = Math.round(refAltitudeSchemeMax.value + AltitudeSchemeMargin);
+
+    //Configuration of speed per minute chart
+    for (let i = 0; i < refRun.value.avgSpeedPerMinuteInMetersPerSecond.length; i++) {
+      var speedInKmt = roundToTwo((refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] * 3600) / 1000);
       refAvgSpeedPerMinutePointList.value.push([i + 1, speedInKmt]);
-      if (!refAvgSpeedPerMinuteSchemeMin.value || speedInKmt < refAvgSpeedPerMinuteSchemeMin.value) {
+      if (!refAvgSpeedPerMinuteSchemeMin.value || speedInKmt < refAvgSpeedPerMinuteSchemeMin.value) { //Find highest value
         refAvgSpeedPerMinuteSchemeMin.value = speedInKmt;
       }
-      if (!refAvgSpeedPerMinuteSchemeMax.value || speedInKmt > refAvgSpeedPerMinuteSchemeMax.value) {
+      if (!refAvgSpeedPerMinuteSchemeMax.value || speedInKmt > refAvgSpeedPerMinuteSchemeMax.value) { //Find lowest value
         refAvgSpeedPerMinuteSchemeMax.value = speedInKmt;
       }
     }
     console.log(refAvgSpeedPerMinutePointList);
-    refAvgSpeedPerMinuteSchemeLength.value = refRun.value.avgSpeedPerMinuteInMetersPerSecond.length;
+    //Modify highest and lowest values by AvgSpeedPerMinuteSchemeMargin to get min and max values of chart
     refAvgSpeedPerMinuteSchemeMin.value = Math.round(refAvgSpeedPerMinuteSchemeMin.value - AvgSpeedPerMinuteSchemeMargin);
     refAvgSpeedPerMinuteSchemeMax.value = Math.round(refAvgSpeedPerMinuteSchemeMax.value + AvgSpeedPerMinuteSchemeMargin);
   })
   .catch((exception) => {
     console.log(exception.response.status);
-    if (exception.response.status == 401) {
+    if (exception.response.status == 401) { //If token userId does not match owner of runId
       refHeader.value = "Ugyldigt runId!";
     }
   });
@@ -214,13 +230,12 @@ function roundToTwo(num) {
 }
 
 .top-stat-div {
-margin-top: 10px;
+  margin-top: 10px;
 }
 
 .bottom-stat-div {
   margin-bottom: 10px;
 }
-
 
 .subscript {
   font-size: 15px;

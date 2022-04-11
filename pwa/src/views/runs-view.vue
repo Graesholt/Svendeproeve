@@ -32,7 +32,8 @@
           </template>
           <Column field="dateTime" header="Tidspunkt" class="datatable-column" style="min-width: 250px; width: 50%; padding: 8px; padding-left: 16px">
             <template #body="slotProps">
-              <p>{{ new Date(slotProps.data.dateTime).toLocaleDateString('en-GB') + " - " + new Date(slotProps.data.dateTime + 'Z').toLocaleTimeString('en-GB') }}</p>
+              <!-- UTC time converted to locale time -->
+              <p>{{ new Date(slotProps.data.dateTime).toLocaleDateString("en-GB") + " - " + new Date(slotProps.data.dateTime + "Z").toLocaleTimeString("en-GB") }}</p>
             </template>
           </Column>
           <Column class="datatable-column datatable-delete-column" style="max-width: 56px; padding: 8px">
@@ -54,6 +55,7 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
+//Vue databindings
 var refUsernamePossesive = ref("");
 var refRuns = ref("");
 var allRuns = [];
@@ -61,7 +63,7 @@ var refDateFrom = ref("");
 var refDateTo = ref("");
 var refDatatableEmptyText = ref();
 
-//Small bit of code to construct danish possessive correctly
+//Small bit of code to construct danish possessive correctly in header
 refUsernamePossesive.value = localStorage.getItem("username");
 var lastLetterInUsername = refUsernamePossesive.value.charAt(refUsernamePossesive.value.length - 1);
 if (lastLetterInUsername == "s" || lastLetterInUsername == "x" || lastLetterInUsername == "z") {
@@ -71,17 +73,20 @@ if (lastLetterInUsername == "s" || lastLetterInUsername == "x" || lastLetterInUs
 }
 console.log(lastLetterInUsername);
 
-//Bliver brugt i stedet for Datatables loading property, fordi jeg synes det er pænere end loading's mørke overlay.
+//Used instead of datatables buildt in loading property, because the loading property dims the whole datatable with a dark overlay
 refDatatableEmptyText.value = "Henter data...";
 
-
+//Set calendar dates
+//From exactly one month ago
+//To today
 refRuns.value = [];
 refDateFrom.value = new Date(Date.now());
 refDateTo.value = new Date(Date.now());
 refDateFrom.value.setMonth(refDateFrom.value.getMonth() - 1);
 
-getRuns();
+getRuns(); //Runs getRuns on page load
 function getRuns() {
+  //Gets all runs for the user found in token
   axios
     .get(process.env.VUE_APP_API_URL + "api/Run", {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
@@ -89,43 +94,47 @@ function getRuns() {
     .then(function (response) {
       console.log(response.data);
       allRuns = response.data;
-      updateTable();
+      updateTable(); //Updates datatable to show Runs within Calendar dates
     });
 }
 
 function logOut() {
-  localStorage.setItem("jwtToken", "");
-  localStorage.setItem("username", "");
-  router.push("/");
+  //Called by log out button
+  localStorage.setItem("jwtToken", ""); //Delete jwtToken from localStorage
+  localStorage.setItem("username", ""); //Delete username from localStorage
+  router.push("/"); //Send user back to Login page
 }
 
-function updateTable() {
+function updateTable() { //Updates datatable to show Runs within Calendar dates
   refRuns.value = [];
+  //Sets from date time to 00:00:00
+  refDateFrom.value.setHours(0);
+  refDateFrom.value.setMinutes(0);
+  refDateFrom.value.setSeconds(0);
+  //Sets to date time to 23:59:59
+  refDateTo.value.setHours(23);
+  refDateTo.value.setMinutes(59);
+  refDateTo.value.setSeconds(59);
   allRuns.forEach((element) => {
-    refDateFrom.value.setHours(0);
-    refDateFrom.value.setMinutes(0);
-    refDateFrom.value.setSeconds(0);
-    refDateTo.value.setHours(23);
-    refDateTo.value.setMinutes(59);
-    refDateTo.value.setSeconds(59);
-    //console.log(new Date(element.dateTime) + new Date(refDateFrom.value) + new Date(refDateTo.value));
-    if (new Date(element.dateTime) >= new Date(refDateFrom.value) && new Date(element.dateTime) <= new Date(refDateTo.value)) {
-      refRuns.value.push(element);
+    //Test if run falls within dates
+    if (new Date(element.dateTime + "Z") >= new Date(refDateFrom.value) && new Date(element.dateTime + "Z") <= new Date(refDateTo.value)) {
+      refRuns.value.push(element); //Add run to datatable
     }
   });
-  //Gross workaround to return to page 1. Only way I could get to work.
+  //Ugly workaround to return to page 1 of datatable after choosing new dates. Only way I could get to work.
   var firstbutton = document.getElementsByClassName("p-paginator-first p-paginator-element p-link");
   firstbutton[0].click();
 
-  refDatatableEmptyText.value = "Ingen løbeture fundet...";
+  refDatatableEmptyText.value = "Ingen løbeture fundet..."; //Message if no Runs found within dates
+  //Databound and set this way, because same property is used above to show loading message (see above)
 }
 
-function viewRun(e) {
+function viewRun(e) { //Called when a run is clicked
   console.log(e.data.runId);
-  router.push("/run/" + e.data.runId);
+  router.push("/run/" + e.data.runId); //Send user to Run details page
 }
 
-function deleteRun(slotProps) {
+function deleteRun(slotProps) { //Called when a runs delete button is clicked
   axios
     .delete(process.env.VUE_APP_API_URL + "api/Run/" + slotProps.data.runId, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },

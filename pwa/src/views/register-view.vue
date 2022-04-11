@@ -31,6 +31,7 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
+//Vue databindings
 var refUsername = ref("");
 var refPassword = ref("");
 var refPasswordConfirm = ref("");
@@ -38,38 +39,38 @@ var refInputsDisabled = ref("");
 var refErrorDiv = ref("");
 var refErrorDivStatus = ref("");
 
-refInputsDisabled.value = false;
-refErrorDivStatus.value = "error";
+refInputsDisabled.value = false; //Ready for input
+refErrorDivStatus.value = "error"; //Set error div to error mode (red text)
 
 async function attemptRegistration() {
-  refInputsDisabled.value = true;
+  refInputsDisabled.value = true; //Lock input
   if (refUsername.value == "") {
     refErrorDiv.value = "Brugernavn ikke indtastet";
-    refInputsDisabled.value = false;
+    refInputsDisabled.value = false; //Unlock input
     return;
   }
   if (refPassword.value != refPasswordConfirm.value) {
     refErrorDiv.value = "Kodeord er ikke ens";
-    refInputsDisabled.value = false;
+    refInputsDisabled.value = false; //Unlock input
     return;
   }
   if (refPassword.value == "") {
     refErrorDiv.value = "Kodeord ikke indtastet";
-    refInputsDisabled.value = false;
+    refInputsDisabled.value = false; //Unlock input
     return;
   }
   let user = { username: refUsername.value, password: refPassword.value };
   try {
     await axios.post(process.env.VUE_APP_API_URL + "api/User/Register", user);
-    refErrorDivStatus.value = "success";
+    refErrorDivStatus.value = "success"; //Set error div to success mode (green text)
     refErrorDiv.value = "Bruger registreret!";
-    await new Promise((r) => setTimeout(r, 2500));
-    router.push("/");
+    await new Promise((r) => setTimeout(r, 2500)); //Wait a moment so user has time to see success message
+    router.push("/"); //Send user back to Login page
   } catch (exception) {
     console.log(exception);
-    if (exception.response.status == 409) {
+    if (exception.response.status == 409) { //If username already in use
       refErrorDiv.value = "Brugernavn er allerede registreret";
-      refInputsDisabled.value = false;
+      refInputsDisabled.value = false; //Unlock input
     }
   }
 }

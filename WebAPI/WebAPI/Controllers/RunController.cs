@@ -26,7 +26,7 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
-        /// GetAllForUser
+        /// Returns all runs associated with userId found in JWT token.
         /// </summary>
         /// <returns></returns>
         // GET: api/Run
@@ -38,11 +38,14 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
-        /// GetRun
+        /// Takes a runId as part of URL.
+        /// Returns Unauthorized if run does not belong to userId found in JWT token.
+        /// Returns NotFound if run does not exist.
+        /// Otherwise, returns run in the form of a RunStats DTO.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="runId"></param>
         /// <returns></returns>
-        // GET: api/Run/5
+        // GET: api/Run/{runId}
         [HttpGet("{runId}")]
         public async Task<ActionResult<RunStats>> GetRun(int runId)
         {
@@ -59,18 +62,22 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
 
+            if (run.points.Count() == 0)
+            {
+                return NoContent();
+            }
+
             RunStats runStats = new RunStats(run);
 
             return runStats;
         }
 
         /// <summary>
-        /// NewRun
+        /// Creates a new Run in database for userId found in JWT token.
+        /// Returns the Run object that was created.
         /// </summary>
-        /// <param name="run"></param>
         /// <returns></returns>
         // POST: api/Run
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Run>> NewRun()
         {
@@ -87,15 +94,26 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
-        /// DeleteRun
+        /// Takes a runId as part of URL.
+        /// Returns Unauthorized if run does not belong to userId found in JWT token.
+        /// Returns NotFound if run does not exist.
+        /// Otherwise, flags run in database as deteled and returns NoContent.
+        /// Does NOT actually delete data.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="runId"></param>
         /// <returns></returns>
-        // DELETE: api/Run/5
+        // DELETE: api/Run/{runId}
         [HttpDelete("{runId}")]
         public async Task<IActionResult> DeleteRun(int runId)
         {
-            var run = await _context.Runs.FindAsync(runId);
+            //var run = await _context.Runs.FindAsync(runId);
+            var run = await _context.Runs.Include("user").FirstOrDefaultAsync(r => r.runId == runId);
+
+            if (run.user.userId != GetUserId())
+            {
+                return Unauthorized();
+            }
+
             if (run == null)
             {
                 return NotFound();

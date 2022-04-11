@@ -20,8 +20,13 @@ namespace UnitTests
     [TestClass]
     public class UnitTest1
     {
-        string url = "http://localhost:5268/";
+        //Blackbox tests of API endpoints
+        //Must be run in a seperate Visual Studio instance while API is running
+        //Tests call the endpoints of the API from the outside
 
+        string url = "http://localhost:5268/"; //Base URL of the test API
+
+        //Tests that new users can be registered
         [TestMethod]
         public async Task RegisterUser()
         {
@@ -35,9 +40,10 @@ namespace UnitTests
 
             Assert.AreEqual(response.StatusCode, HttpStatusCode.Created);
 
-            //Test users following this exact naming scheme are cleaned up by a job running once an hour on the database.
+            //Test users following this exact naming scheme are cleaned up by a job running once an hour on the in-house test database
         }
 
+        //Tests that user can log in
         [TestMethod]
         public async Task LoginUser()
         {
@@ -52,6 +58,7 @@ namespace UnitTests
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
         }
 
+        //Tests that user can get a list of their Runs
         [TestMethod]
         public async Task GetRuns()
         {
@@ -65,6 +72,7 @@ namespace UnitTests
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
         }
 
+        //Tests that users can get detailed information about a Run
         [TestMethod]
         public async Task GetRun()
         {
@@ -80,6 +88,63 @@ namespace UnitTests
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
         }
 
+        //Tests that the API can return Runs containing no Points
+        //Should not happen, but might if user is too fast to use system back-button in app
+        [TestMethod]
+        public async Task GetRunNoPoints()
+        {
+            string token = await LoginTestUser();
+            int runId = await CreateNewRun(token);
+
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            HttpResponseMessage response = await client.GetAsync(url + "api/Run/" + runId);
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.NoContent);
+        }
+
+        //Tests that the API can return Runs containing only a single Point
+        [TestMethod]
+        public async Task GetRunSinglePoint()
+        {
+            string token = await LoginTestUser();
+            int runId = await CreateNewRun(token);
+
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+            Point point = new Point();
+            point.latitude = 56.3730402904326;
+            point.longitude = 9.65708833471725;
+            point.altitude = 47;
+            var stringContent = new StringContent(JsonConvert.SerializeObject(point), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(url + "api/Point/" + runId, stringContent);
+
+            HttpResponseMessage response2 = await client.GetAsync(url + "api/Run/" + runId);
+
+            Assert.AreEqual(response2.StatusCode, HttpStatusCode.OK);
+        }
+
+        //Tests that users can NOT get Runs which do not belong to them
+        [TestMethod]
+        public async Task GetRunUnauthorized()
+        {
+            string token = await LoginTestUser();
+            int runId = await CreateNewRun(token);
+            await CreatePoints(token, runId);
+
+            string unauthorizedToken = await LoginUnauthorizedTestUser();
+
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + unauthorizedToken);
+            HttpResponseMessage response = await client.GetAsync(url + "api/Run/" + runId);
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.Unauthorized);
+        }
+
+        //Tests that users can create new runs
         [TestMethod]
         public async Task NewRun()
         {
@@ -94,6 +159,7 @@ namespace UnitTests
             Assert.AreEqual(response.StatusCode, HttpStatusCode.Created);
         }
 
+        //Tests that users can delete Runs
         [TestMethod]
         public async Task DeleteRun()
         {
@@ -109,6 +175,25 @@ namespace UnitTests
             Assert.AreEqual(response.StatusCode, HttpStatusCode.NoContent);
         }
 
+        //Tests that users can NOT delete Runs which do not belong to them
+        [TestMethod]
+        public async Task DeleteRunUnauthorized()
+        {
+            string token = await LoginTestUser();
+            int runId = await CreateNewRun(token);
+            await CreatePoints(token, runId);
+
+            string unauthorizedToken = await LoginUnauthorizedTestUser();
+
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + unauthorizedToken);
+            HttpResponseMessage response = await client.DeleteAsync(url + "api/Run/" + runId);
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.Unauthorized);
+        }
+
+        //Tests that users can add Points to Runs
         [TestMethod]
         public async Task NewPoint()
         {
@@ -128,6 +213,30 @@ namespace UnitTests
             Assert.AreEqual(response.StatusCode, HttpStatusCode.Created);
         }
 
+        //Tests that user can NOT add points to Runs which do not belong to them
+        [TestMethod]
+        public async Task NewPointUnauthorized()
+        {
+            string token = await LoginTestUser();
+            int runId = await CreateNewRun(token);
+
+            string unauthorizedToken = await LoginUnauthorizedTestUser();
+
+            HttpClient client = new HttpClient();
+
+            Point point = new Point();
+            point.latitude = 56.3730402904326;
+            point.longitude = 9.65708833471725;
+            point.altitude = 47;
+            var stringContent = new StringContent(JsonConvert.SerializeObject(point), Encoding.UTF8, "application/json");
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + unauthorizedToken);
+            HttpResponseMessage response = await client.PostAsync(url + "api/Point/" + runId, stringContent);
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.Unauthorized);
+        }
+
+        //Logs in a user with test credentials
+        //Returns the users token
         public async Task<string> LoginTestUser()
         {
             HttpClient client = new HttpClient();
@@ -139,6 +248,22 @@ namespace UnitTests
             return token;
         }
 
+        //Logs in a user with different test credentials
+        //Returns the users token
+        public async Task<string> LoginUnauthorizedTestUser()
+        {
+            HttpClient client = new HttpClient();
+
+            var stringContent = new StringContent("{\"username\":\"FunRunTestingUnauthorized\", \"password\":\"tqewsetritnygu\"}", Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(url + "api/User/Login", stringContent);
+            string token = await response.Content.ReadAsStringAsync();
+
+            return token;
+        }
+
+        //Takes a token
+        //Creates a new run
+        //Returns the runId
         public async Task<int> CreateNewRun(string token)
         {
             HttpClient client = new HttpClient();
@@ -151,6 +276,8 @@ namespace UnitTests
             return run.runId;
         }
 
+        //Takes a runId
+        //Creates five points comprising a small test route
         public async Task CreatePoints(string token, int runId)
         {
             Point[] testRoutePoints = new Point[5];

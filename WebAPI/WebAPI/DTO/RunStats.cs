@@ -10,36 +10,40 @@ namespace WebAPI.DTO
         }
 
         /// <summary>
-        /// 
+        /// Takes a Run object.
+        /// Returns a RunStats DTO that contains information derived from original objects data.
         /// </summary>
         /// <param name="run"></param>
         public RunStats(Run run)
         {
+            //Data recycled from original Run object
             dateTime = run.dateTime;
             points = run.points;
 
-            //Distance
+            //Calculate total distance
             distance = 0;
             for (int i = 0; i < run.points.Count() - 1; i++)
             {
                 distance += latLongDistanceiInMeters(run.points[i].latitude, run.points[i].longitude, run.points[i + 1].latitude, run.points[i + 1].longitude);
             }
 
-            //Duration
+            //Calculate total duration
+            //Use first point to last point for accuracy
+            //If only one point in run, use run.dateTime to last point, to avoid dividing by zero later (this makes duration result for Runs with only one point slightly less accurate)
             duration = run.points.Last().dateTime.Subtract(run.points.First().dateTime);
             if (duration == TimeSpan.Zero)
             {
                 duration = run.points.Last().dateTime.Subtract(run.dateTime);
             }
 
-            //Average Speed
+            //Calculate average speed
             avgSpeedInMetersPerSecond = distance / duration.TotalSeconds;
 
-            //Average Speed pr minute (for chart)
+            //Calculate average speed pr minute (for chart)
             avgSpeedPerMinuteInMetersPerSecond = new List<double>();
             avgSpeedPerMinuteInMetersPerSecond.Add(0);
             int minute = 1;
-            int restPrecisionFactor = 100;
+            int restPrecisionFactor = 1000; //Number of parts to split remainders between minutes into. With the frequency of points being no more than a few seconds, 1000 should be plenty accurate
             for (int i1 = 0; i1 < run.points.Count() - 1; i1++)
             {
                 if (run.points[i1 + 1].dateTime < run.dateTime.AddMinutes(minute))
@@ -55,17 +59,17 @@ namespace WebAPI.DTO
                     double restDistance = latLongDistanceiInMeters(run.points[i1].latitude, run.points[i1].longitude, run.points[i1 + 1].latitude, run.points[i1 + 1].longitude) / restPrecisionFactor;
                     for (int i2 = 1; i2 <= restPrecisionFactor; i2++)
                     {
-                        if (run.points[i1].dateTime + (i2 * restTime) < run.dateTime.AddMinutes(minute))
+                        if (run.points[i1].dateTime + (i2 * restTime) < run.dateTime.AddMinutes(minute)) //This minute
                         {
                             avgSpeedPerMinuteInMetersPerSecond[minute - 1] += restDistance;
                         }
-                        else
+                        else //Next minute
                         {
                             avgSpeedPerMinuteInMetersPerSecond[minute] += restDistance;
                         }
                     }
 
-                    minute++;
+                    minute++; //Increment minute
                 }
             }
             for (int i = 0; i < avgSpeedPerMinuteInMetersPerSecond.Count(); i++)
@@ -76,7 +80,7 @@ namespace WebAPI.DTO
                 }
                 else
                 {
-                    //Last minute might not be a whole minute...
+                    //Last minute might not be a whole minute, so divide by the number of seconds remaining instead.
                     //castings to double to force decimal results.
                     avgSpeedPerMinuteInMetersPerSecond[i] = avgSpeedPerMinuteInMetersPerSecond[i] / ((double)duration.Seconds + ((double)duration.Milliseconds / (double)1000));
                 }

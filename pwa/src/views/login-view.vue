@@ -32,26 +32,27 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
+//Vue databindings
 var refUsername = ref("");
 var refPassword = ref("");
 var refInputsDisabled = ref("");
 var refErrorDiv = ref("");
 
-refInputsDisabled.value = false;
+refInputsDisabled.value = false; //Ready for input
 
-async function attemptLogin() {
-  refInputsDisabled.value = true;
+async function attemptLogin() { //Called when Login button is clicked
+  refInputsDisabled.value = true; //Lock input
   let user = { username: refUsername.value, password: refPassword.value };
   try {
     let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
-    localStorage.setItem("jwtToken", response.data);
-    localStorage.setItem("username", refUsername.value);
-    router.push("/runs");
+    localStorage.setItem("jwtToken", response.data); //Save jwtToken in localStorage
+    localStorage.setItem("username", refUsername.value); //Save username in localStorage
+    router.push("/runs"); //Send user to Runs page
   } catch (exception) {
     console.log(exception);
-    if (exception.response.status == 404) {
-      refErrorDiv.value = "Ukorrekte brugeroplysninger";
-      refInputsDisabled.value = false;
+    if (exception.response.status == 404) { //If user is not found
+      refErrorDiv.value = "Ukorrekte brugeroplysninger"; //Display error to user
+      refInputsDisabled.value = false; //Unlock input
     }
   }
 }
