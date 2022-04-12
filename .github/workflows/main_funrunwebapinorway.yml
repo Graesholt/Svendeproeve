@@ -40,20 +40,25 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp
 
   test:
-    build:
-      runs-on: windows-latest
+    runs-on: windows-latest
+    needs: build
 
     env:
       working-directory: ./WebAPI
 
     steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+        name: .net-app
+
       - name: Run unit tests
         run: dotnet test --filter "ClassName=UnitTests.UnitTest"
         working-directory: ${{env.working-directory}}
 
   deploy:
     runs-on: windows-latest
-    needs: build
+    needs: test
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
