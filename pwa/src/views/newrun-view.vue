@@ -28,7 +28,7 @@ const router = useRouter();
 //Vue databindings
 var refStartRunButton = ref("");
 var refTimer = ref([]);
-var status =  ref("");
+var status = ref("");
 
 status.value = "ready";
 var runId;
@@ -76,7 +76,8 @@ function createMap() {
     .addTo(map);
 
   //Function in watchPosition() is called every time device GPS has a new location
-  watchId = navigator.geolocation.watchPosition((position) => {
+  watchId = navigator.geolocation.watchPosition(
+    (position) => {
       console.log("position", position);
       //Configure point object
       let point = {
@@ -85,12 +86,14 @@ function createMap() {
         altitude: position.coords.altitude,
       };
       console.log("point", point);
-      if (status.value == "run started" || status.value == "running") { //If a run is in progress
+      //If a run is in progress
+      if (status.value == "run started" || status.value == "running") {
         //Post point to API
         axios.post(process.env.VUE_APP_API_URL + "api/Point/" + runId, point, { headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` } });
         //Add point to map polyline
         runPolyline.addLatLng(new L.LatLng(point.latitude, point.longitude));
-        if (status.value == "run started") { //If first point since run started
+        //If first point since run started
+        if (status.value == "run started") {
           status.value = "running";
           startTime = Date.now(); //Set Timer start time
           timerInterval = setInterval(updateTimer, 10); //Update timer ten times a second
@@ -105,8 +108,10 @@ function createMap() {
   );
 }
 
-async function runButton() { //Called when button is pressed
-  if (status.value == "ready") { //If ready to start run
+//Called when button is pressed
+async function runButton() {
+  //If ready to start run
+  if (status.value == "ready") {
     status.value = "starting run";
     refStartRunButton.value = "Starter løbetur"; //Change button to show it is inactive
     await axios
@@ -118,17 +123,19 @@ async function runButton() { //Called when button is pressed
         runId = response.data.runId;
         console.log(runId);
         status.value = "run started"; //Ready to log points, now that runId is known
+
         //Test if wakeLock exists. Will fail on many traditional computers, but not on devices such as phones.
         if ("wakeLock" in navigator) {
           try {
             lock = await navigator.wakeLock.request("screen"); //Set wakeLock, preventing screen from locking
           } catch (err) {
-            //Error or rejection
+            //Error occurred
             console.log("Wake Lock error: ", err);
           }
         }
       });
-  } else if (status.value == "running") { //When stop button is pressed
+  } //When stop button is pressed
+  else if (status.value == "running") {
     status.value = "done";
     navigator.geolocation.clearWatch(watchId); //Stop getting location via watchPosition()
     clearInterval(timerInterval); //Stop updating timer
@@ -139,7 +146,8 @@ async function runButton() { //Called when button is pressed
   }
 }
 
-function updateTimer() { //Updates timer
+//Updates timer
+function updateTimer() {
   var timer = Date.now() - startTime;
   refTimer.value.hours = Math.floor(timer / 1000 / 60 / 60);
   refTimer.value.minutes = Math.floor((timer - refTimer.value.hours * 1000 * 60 * 60) / 1000 / 60);
@@ -156,7 +164,8 @@ function updateTimer() { //Updates timer
   }
 }
 
-onUnmounted(async () => { //If page is somehow left while a run is in progress
+//If page is somehow left while a run is in progress
+onUnmounted(async () => {
   navigator.geolocation.clearWatch(watchId); //Stop getting location via watchPosition()
   clearInterval(timerInterval); //Stop updating timer
   if ("wakeLock" in navigator) {
