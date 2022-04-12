@@ -33,7 +33,7 @@
           <Column field="dateTime" header="Tidspunkt" class="datatable-column" style="min-width: 250px; width: 50%; padding: 8px; padding-left: 16px">
             <template #body="slotProps">
               <!-- UTC time converted to locale time -->
-              <p>{{ new Date(slotProps.data.dateTime).toLocaleDateString("en-GB") + " - " + new Date(slotProps.data.dateTime + "Z").toLocaleTimeString("en-GB") }}</p>
+              <p>{{ new Date(slotProps.data.dateTime + "Z").toLocaleDateString("en-GB") + " - " + new Date(slotProps.data.dateTime + "Z").toLocaleTimeString("en-GB") }}</p>
             </template>
           </Column>
           <Column class="datatable-column datatable-delete-column" style="max-width: 56px; padding: 8px">
@@ -77,12 +77,15 @@ console.log(lastLetterInUsername);
 refDatatableEmptyText.value = "Henter data...";
 
 //Set calendar dates
-//From exactly one month ago
-//To today
+//refDateFrom to exactly one month ago
+//refDateTo to today
 refRuns.value = [];
 refDateFrom.value = new Date(Date.now());
 refDateTo.value = new Date(Date.now());
 refDateFrom.value.setMonth(refDateFrom.value.getMonth() - 1);
+//Set time of both calendars to midnight
+refDateFrom.value.setHours(0,0,0,0);
+refDateTo.value.setHours(0,0,0,0);
 
 getRuns(); //Runs getRuns on page load
 function getRuns() {
@@ -105,19 +108,14 @@ function logOut() {
   router.push("/"); //Send user back to Login page
 }
 
-function updateTable() { //Updates datatable to show Runs within Calendar dates
-  refRuns.value = [];
-  //Sets from date time to 00:00:00
-  refDateFrom.value.setHours(0);
-  refDateFrom.value.setMinutes(0);
-  refDateFrom.value.setSeconds(0);
-  //Sets to date time to 23:59:59
-  refDateTo.value.setHours(23);
-  refDateTo.value.setMinutes(59);
-  refDateTo.value.setSeconds(59);
+function updateTable() {
+  //Updates datatable to show Runs within Calendar dates
+  refRuns.value = []; //Empty datatable
+
   allRuns.forEach((element) => {
-    //Test if run falls within dates
-    if (new Date(element.dateTime + "Z") >= new Date(refDateFrom.value) && new Date(element.dateTime + "Z") <= new Date(refDateTo.value)) {
+    //Test if run falls within dates (UTC time from database converted to local)
+    var runTime = new Date(element.dateTime + "Z")
+    if (Date.parse(runTime) >= Date.parse(refDateFrom.value) && Date.parse(runTime) <= (Date.parse(refDateTo.value) + 86400000)) {
       refRuns.value.push(element); //Add run to datatable
     }
   });
@@ -129,12 +127,14 @@ function updateTable() { //Updates datatable to show Runs within Calendar dates
   //Databound and set this way, because same property is used above to show loading message (see above)
 }
 
-function viewRun(e) { //Called when a run is clicked
+function viewRun(e) {
+  //Called when a run is clicked
   console.log(e.data.runId);
   router.push("/run/" + e.data.runId); //Send user to Run details page
 }
 
-function deleteRun(slotProps) { //Called when a runs delete button is clicked
+function deleteRun(slotProps) {
+  //Called when a runs delete button is clicked
   axios
     .delete(process.env.VUE_APP_API_URL + "api/Run/" + slotProps.data.runId, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },

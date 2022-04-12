@@ -56,6 +56,7 @@ namespace WebAPI.Controllers
             return _context.Points.Any(e => e.pointId == id);
         }
 
+        //Gets userId from supplied token
         protected int GetUserId()
         {
             return int.Parse(this.User.Claims.First(i => i.Type == "userId").Value);

@@ -44,18 +44,84 @@ refErrorDivStatus.value = "error"; //Set error div to error mode (red text)
 
 async function attemptRegistration() {
   refInputsDisabled.value = true; //Lock input
+
+  //User info validation happens again on server with the same checks
+  //The checks below are faster for the user, instead of making a call for every attempt
+  //They also enable the app to show valid information about why the info is not accepted
+  //Server side is for extra security
+
+  //Username validation
   if (refUsername.value == "") {
+    //Blank username input
     refErrorDiv.value = "Brugernavn ikke indtastet";
     refInputsDisabled.value = false; //Unlock input
     return;
   }
-  if (refPassword.value != refPasswordConfirm.value) {
-    refErrorDiv.value = "Kodeord er ikke ens";
+  if (refUsername.value.length < 6) {
+    //Username too short
+    refErrorDiv.value = "Brugernavn skal være mindst 6 karakterer langt";
     refInputsDisabled.value = false; //Unlock input
     return;
   }
+  if (refUsername.value.length > 30) {
+    //Username too long
+    refErrorDiv.value = "Brugernavn må ikke være længere end 30 karakterer";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+  if (!refUsername.value.match(/^[a-zA-Z0-9-@._!?]+$/)) {
+    //Username contains illegal character
+    refErrorDiv.value = "Brugernavn må kun indeholde store og små bogstaver, tal, og tilladte specialtegn (som . - _ @ ! ? )";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+
+  //Password validation
   if (refPassword.value == "") {
+    //Blank password
     refErrorDiv.value = "Kodeord ikke indtastet";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+  if (refPassword.value.length < 8) {
+    //Password too short
+    refErrorDiv.value = "Kodeord skal være mindst 8 karakterer langt";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+  if (refPassword.value.length > 99) {
+    //Password too long
+    refErrorDiv.value = "Kodeord må ikke være længere end 99 karakterer";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+  if (!refPassword.value.match(/.*[A-Z].*/)) {
+    //Password does not include upper case letter
+    refErrorDiv.value = "Kodeord skal inkludere mindst et stort bogstav";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+  if (!refPassword.value.match(/.*[a-z].*/)) {
+    //Password does not include lower case letter
+    refErrorDiv.value = "Kodeord skal inkludere mindst et lille bogstav";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+  if (!refPassword.value.match(/.*[0-9-@._!?].*/)) {
+    //Password does not include capital letter
+    refErrorDiv.value = "Kodeord skal inkludere mindst et tal eller specialtegn (som . - _ @ ! ? )";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+  if (!refPassword.value.match(/^[a-zA-Z0-9-@._!?]+$/)) {
+    //Password contains illegal character
+    refErrorDiv.value = "Kodeord må kun indeholde store og små bogstaver, tal, og tilladte specialtegn (som . - _ @ ! ? )";
+    refInputsDisabled.value = false; //Unlock input
+    return;
+  }
+  if (refPassword.value != refPasswordConfirm.value) {
+    //Passwords do not match
+    refErrorDiv.value = "Kodeord er ikke ens";
     refInputsDisabled.value = false; //Unlock input
     return;
   }
@@ -68,7 +134,8 @@ async function attemptRegistration() {
     router.push("/"); //Send user back to Login page
   } catch (exception) {
     console.log(exception);
-    if (exception.response.status == 409) { //If username already in use
+    if (exception.response.status == 409) {
+      //If username already in use
       refErrorDiv.value = "Brugernavn er allerede registreret";
       refInputsDisabled.value = false; //Unlock input
     }

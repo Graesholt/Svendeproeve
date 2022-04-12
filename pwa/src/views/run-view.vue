@@ -103,7 +103,7 @@ axios
     console.log(response.data);
     refRun.value = response.data;
     //Header configured. UTC time converted to locale time
-    refHeader.value = new Date(refRun.value.dateTime).toLocaleDateString("en-GB") + " - " + new Date(refRun.value.dateTime + "Z").toLocaleTimeString("en-GB");
+    refHeader.value = new Date(refRun.value.dateTime + "Z").toLocaleDateString("en-GB") + " - " + new Date(refRun.value.dateTime + "Z").toLocaleTimeString("en-GB");
 
     //Map: creation
     var map = L.map("run-map");
@@ -135,6 +135,7 @@ axios
     var startTooltip = L.tooltip({
       direction: "top",
       permanent: true,
+
     })
       .setLatLng(mapPointList[0])
       .setContent("Start")
@@ -206,6 +207,9 @@ axios
     console.log(exception.response.status);
     if (exception.response.status == 401) { //If token userId does not match owner of runId
       refHeader.value = "Ugyldigt runId!";
+    }
+    else if (exception.response.status == 422) {
+      refHeader.value = "Ingen punkt data";
     }
   });
 

@@ -15,6 +15,7 @@ using System.Security.Claims;
 using System.Text;
 
 using BCryptNet = BCrypt.Net.BCrypt;
+using System.Text.RegularExpressions;
 
 namespace WebAPI.Controllers
 {
@@ -33,7 +34,8 @@ namespace WebAPI.Controllers
 
         /// <summary>
         /// Takes a user object from the webservice.
-        /// Returns an error if username or password is incorrect.
+        /// Returns NotFound if username or password cannot be validated by the same method they were during registration.
+        /// Returns NotFound if username or password is incorrect.
         /// Otherwise, returns a JWT Token.
         /// </summary>
         /// <param name="loginUser"></param>
@@ -42,6 +44,12 @@ namespace WebAPI.Controllers
         [HttpPost("Login")]
         public async Task<ActionResult<User>> LoginUser(User loginUser)
         {
+            //Validate User info before interacting with database
+            if (ValidateUserInfo(loginUser) == false)
+            {
+                return NotFound("User info not correct");
+            }
+
             //var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginUser.Username);
             var user = (await _context.Users.Where(u => u.username == loginUser.username).ToListAsync()).FirstOrDefault(u => u.username == loginUser.username); //Case sensitivity hack
 
@@ -75,7 +83,8 @@ namespace WebAPI.Controllers
 
         /// <summary>
         /// Takes a user object from the webservice.
-        /// Returns an error if username already exists.
+        /// Returns Forbid if username or password cannot be validated by the same parameters they would be before leaving the app.
+        /// Returns Conflict if username already exists.
         /// Otherwise, adds user to database and returns Status Code 201.
         /// </summary>
         /// <param name="registerUser"></param>
@@ -84,6 +93,12 @@ namespace WebAPI.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult<User>> RegisterUser(User registerUser)
         {
+            //Validate User info before interacting with database
+            if (ValidateUserInfo(registerUser) == false)
+            {
+                return Forbid();
+            }
+
             //var user = await _context.Users.FirstOrDefaultAsync(u => u.username == registerUser.username);
             var user = (await _context.Users.Where(u => u.username == registerUser.username).ToListAsync()).FirstOrDefault(u => u.username == registerUser.username); //Case sensitivity hack
 
@@ -100,9 +115,77 @@ namespace WebAPI.Controllers
             return StatusCode(201);
         }
 
+        /// <summary>
+        /// Takes a user object.
+        /// Returns Forbid if username or password cannot be validated.
+        /// Returns NotFound if username incorrect.
+        /// Otherwise, changes user password in dtabase and returns Status Code 201.
+        /// Only for emergency use (such as when password validation is introduced mid-project), and NEVER for production!
+        /// </summary>
+        /// <param name="registerUser"></param>
+        /// <returns></returns>
+        // POST: api/User/Register
+        //[HttpPost("Alter")]
+        //public async Task<ActionResult<User>> AlterUser(User alterUser)
+        //{
+        //    //Validate User info before interacting with database
+        //    if (ValidateUserInfo(alterUser) == false)
+        //    {
+        //        return Forbid();
+        //    }
+
+        //    //var user = await _context.Users.FirstOrDefaultAsync(u => u.username == alterUser.username);
+        //    var user = (await _context.Users.Where(u => u.username == alterUser.username).ToListAsync()).FirstOrDefault(u => u.username == alterUser.username); //Case sensitivity hack
+
+        //    if (user == null)
+        //    {
+        //        return NotFound("User info not correct");
+        //    }
+
+        //    user.password = BCryptNet.HashPassword(alterUser.password, BCryptNet.GenerateSalt());
+
+        //    _context.Users.Update(user);
+        //    await _context.SaveChangesAsync();
+
+        //    return StatusCode(201);
+        //}
+
         private bool UserExists(int id)
         {
             return _context.Users.Any(e => e.userId == id);
+        }
+
+        //Validates user info with same checks as client
+        //Client side is faster for user, instead of making a call for every attempt
+        //Server side is for extra security
+        public static bool ValidateUserInfo(User user)
+        {
+            //Could be one long statement, but this makes debugging somewhat easier
+            if (user.username == "" ||
+                user.username.Length < 6 ||
+                user.username.Length > 30)
+            {
+                return false;
+            }
+            if (!Regex.Match(user.username, "^[a-zA-Z0-9-@._!?]+$").Success)
+            {
+                return false;
+            }
+            if (user.password == "" ||
+                user.password.Length < 8 ||
+                user.password.Length > 99)
+            {
+                return false;
+            }
+            if (!Regex.Match(user.password, ".*[A-Z].*").Success ||
+                !Regex.Match(user.password, ".*[a-z].*").Success ||
+                !Regex.Match(user.password, ".*[0-9-@._!?].*").Success ||
+                !Regex.Match(user.password, "^[a-zA-Z0-9-@._!?]+$").Success)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

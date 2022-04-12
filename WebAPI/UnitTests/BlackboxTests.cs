@@ -1,15 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WebAPI.Controllers;
 using WebAPI.Models;
-using WebAPI.Context;
-using Microsoft.Extensions.Configuration;
-using System.IdentityModel.Tokens.Jwt;
-using WebAPI;
-using System.Collections.Generic;
-using System.Security.Claims;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -18,11 +9,11 @@ using Newtonsoft.Json;
 namespace UnitTests
 {
     [TestClass]
-    public class UnitTest1
+    public class BlackboxTests
     {
         //Blackbox tests of API endpoints
         //Must be run in a seperate Visual Studio instance while API is running
-        //Tests call the endpoints of the API from the outside
+        //tests call the endpoints of the API from the outside
 
         string url = "http://localhost:5268/"; //Base URL of the test API
 
@@ -33,14 +24,16 @@ namespace UnitTests
             HttpClient client = new HttpClient();
 
             User user = new User();
-            user.username = "FunRunTesting" + System.DateTime.Now;
-            user.password = "tqewsetritnygu";
+            user.username = "FRT-" + System.DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss.fff");
+            user.password = "tQeWsEtRiTnYg5";
             var stringContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(url + "api/User/Register", stringContent);
 
             Assert.AreEqual(response.StatusCode, HttpStatusCode.Created);
 
             //Test users following this exact naming scheme are cleaned up by a job running once an hour on the in-house test database
+            //Should be practically impossible to generate two users with the same username, as the test would have to run twice in one millisecond
+            //Depending on the size of the dev team running tests this is unlikely to happen
         }
 
         //Tests that user can log in
@@ -51,7 +44,7 @@ namespace UnitTests
 
             User user = new User();
             user.username = "FunRunTesting";
-            user.password = "tqewsetritnygu";
+            user.password = "tQeWsEtRiTnYg5";
             var stringContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(url + "api/User/Login", stringContent);
 
@@ -101,7 +94,7 @@ namespace UnitTests
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
             HttpResponseMessage response = await client.GetAsync(url + "api/Run/" + runId);
 
-            Assert.AreEqual(response.StatusCode, HttpStatusCode.NoContent);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.UnprocessableEntity);
         }
 
         //Tests that the API can return Runs containing only a single Point
@@ -241,7 +234,10 @@ namespace UnitTests
         {
             HttpClient client = new HttpClient();
 
-            var stringContent = new StringContent("{\"username\":\"FunRunTesting\", \"password\":\"tqewsetritnygu\"}", Encoding.UTF8, "application/json");
+            User user = new User();
+            user.username = "FunRunTesting";
+            user.password = "tQeWsEtRiTnYg5";
+            var stringContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(url + "api/User/Login", stringContent);
             string token = await response.Content.ReadAsStringAsync();
 
@@ -254,7 +250,10 @@ namespace UnitTests
         {
             HttpClient client = new HttpClient();
 
-            var stringContent = new StringContent("{\"username\":\"FunRunTestingUnauthorized\", \"password\":\"tqewsetritnygu\"}", Encoding.UTF8, "application/json");
+            User user = new User();
+            user.username = "FunRunTestingUnauthorized";
+            user.password = "tQeWsEtRiTnYg5";
+            var stringContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             HttpResponseMessage response = await client.PostAsync(url + "api/User/Login", stringContent);
             string token = await response.Content.ReadAsStringAsync();
 

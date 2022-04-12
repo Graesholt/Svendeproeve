@@ -41,6 +41,7 @@ namespace WebAPI.Controllers
         /// Takes a runId as part of URL.
         /// Returns Unauthorized if run does not belong to userId found in JWT token.
         /// Returns NotFound if run does not exist.
+        /// Returns UnprocessableEntity if run contains no points, which should not happen, but can if user redirects from page before sending any points.
         /// Otherwise, returns run in the form of a RunStats DTO.
         /// </summary>
         /// <param name="runId"></param>
@@ -64,7 +65,7 @@ namespace WebAPI.Controllers
 
             if (run.points.Count() == 0)
             {
-                return NoContent();
+                return UnprocessableEntity();
             }
 
             RunStats runStats = new RunStats(run);
@@ -131,6 +132,7 @@ namespace WebAPI.Controllers
             return _context.Runs.Any(e => e.runId == id);
         }
 
+        //Gets userId from supplied token
         protected int GetUserId()
         {
             return int.Parse(this.User.Claims.First(i => i.Type == "userId").Value);

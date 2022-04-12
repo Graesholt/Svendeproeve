@@ -24,6 +24,6 @@ AS
 BEGIN
 	DELETE
 	FROM [RunDB].[dbo].[Users]
-	WHERE username LIKE 'FunRunTesting__/__/____ __:__:__'
+	WHERE username LIKE 'FRT-____.__.__-__.__.__.___'
 END
 GO
