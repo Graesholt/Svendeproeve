@@ -11,7 +11,7 @@
       <InputText type="password" class="center-input-field" v-model="refPassword" name="Password" v-on:keyup.enter="attemptRegistration" :disabled="refInputsDisabled" />
       <p class="center-text">Gentag kodeord</p>
       <InputText type="password" class="center-input-field" v-model="refPasswordConfirm" name="PasswordConfirm" v-on:keyup.enter="attemptRegistration" :disabled="refInputsDisabled" />
-      <p v-if="refErrorDiv" class="error-text-height center-text" v-bind:class="{ 'error-text': refErrorDivStatus == 'error', 'error-text-success': refErrorDivStatus == 'success' }">
+      <p v-if="refErrorDiv" class="registration-error-text-height center-text" v-bind:class="{ 'error-text': refErrorDivStatus == 'error', 'error-text-success': refErrorDivStatus == 'success' }">
         {{ refErrorDiv }}
       </p>
       <div v-else class="error-text-height"></div>
@@ -44,6 +44,7 @@ refErrorDivStatus.value = "error"; //Set error div to error mode (red text)
 
 async function attemptRegistration() {
   refInputsDisabled.value = true; //Lock input
+  refErrorDiv.value = ""; //Wipe previous error message
 
   //User info validation happens again on server with the same checks
   //The checks below are faster for the user, instead of making a call for every attempt
@@ -155,6 +156,13 @@ async function attemptRegistration() {
   min-width: 300px;
 
   margin-top: 6vh;
+}
+
+.registration-error-text-height {
+  /*height not locked, since error can be multi-line*/
+  padding: 0;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .error-text-success {

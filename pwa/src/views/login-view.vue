@@ -42,6 +42,7 @@ refInputsDisabled.value = false; //Ready for input
 
 async function attemptLogin() { //Called when Login button is clicked
   refInputsDisabled.value = true; //Lock input
+  refErrorDiv.value = ""; //Wipe previous error message
   let user = { username: refUsername.value, password: refPassword.value };
   try {
     let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
