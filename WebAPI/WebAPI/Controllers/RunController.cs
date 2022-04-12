@@ -84,7 +84,8 @@ namespace WebAPI.Controllers
         {
             var run = new Run();
 
-            run.dateTime = DateTime.UtcNow; //Do not trust client time, server time is reliable
+            //Do not trust client time, server time is reliable
+            run.dateTime = DateTime.UtcNow;
             run.user = await _context.Users.FirstOrDefaultAsync(u => u.userId == GetUserId());
             run.deleted = false;
 

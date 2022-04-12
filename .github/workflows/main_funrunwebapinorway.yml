@@ -29,9 +29,6 @@ jobs:
         run: dotnet build --configuration Release
         working-directory: ${{env.working-directory}}
 
-      - name: Run unit tests
-        run: dotnet test --filter "ClassName=UnitTests.UnitTest"
-
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
         working-directory: ${{env.working-directory}}
@@ -41,6 +38,18 @@ jobs:
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
+
+  test:
+    build:
+      runs-on: windows-latest
+
+    env:
+      working-directory: ./WebAPI
+
+    steps:
+        - name: Run unit tests
+        run: dotnet test --filter "ClassName=UnitTests.UnitTest"
+        working-directory: ${{env.working-directory}}
 
   deploy:
     runs-on: windows-latest
