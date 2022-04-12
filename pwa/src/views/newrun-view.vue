@@ -81,8 +81,8 @@ function createMap() {
       console.log("position", position);
       //Configure point object
       let point = {
-        longitude: position.coords.longitude,
         latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
         altitude: position.coords.altitude,
       };
       console.log("point", point);
@@ -95,17 +95,17 @@ function createMap() {
         //If first point since run started
         if (status.value == "run started") {
           status.value = "running";
-           //Set Timer start time
+          //Set Timer start time
           startTime = Date.now();
-           //Update timer ten times a second
+          //Update timer ten times a second
           timerInterval = setInterval(updateTimer, 10);
-           //Change button to show it will now end run
+          //Change button to show it will now end run
           refStartRunButton.value = "Stop løbetur";
         }
       }
-       //Move Map
+      //Move Map
       map.panTo(new L.LatLng(point.latitude, point.longitude));
-       //Move current location tooltip
+      //Move current location tooltip
       runnerTooltip.setLatLng(new L.LatLng(point.latitude, point.longitude));
     },
     () => {},

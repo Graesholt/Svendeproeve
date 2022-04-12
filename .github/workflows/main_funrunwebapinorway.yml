@@ -29,8 +29,8 @@ jobs:
         run: dotnet build --configuration Release
         working-directory: ${{env.working-directory}}
 
-      - name: Run Unit tests
-        run: dotnet test --filter "ClassName~UnitTest"
+      - name: Run unit tests
+        run: dotnet test --filter "ClassName=UnitTest"
         working-directory: ${{env.working-directory}}     
 
       - name: dotnet publish
