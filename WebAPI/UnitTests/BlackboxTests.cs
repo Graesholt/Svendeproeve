@@ -119,6 +119,20 @@ namespace UnitTests
             Assert.AreEqual(response2.StatusCode, HttpStatusCode.OK);
         }
 
+        //Tests that NotFound is returned if Run does not exist
+        [TestMethod]
+        public async Task GetRunNotFound()
+        {
+            string token = await LoginTestUser();
+
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            HttpResponseMessage response = await client.GetAsync(url + "api/Run/-1");
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.NotFound);
+        }
+
         //Tests that users can NOT get Runs which do not belong to them
         [TestMethod]
         public async Task GetRunUnauthorized()
@@ -168,6 +182,20 @@ namespace UnitTests
             Assert.AreEqual(response.StatusCode, HttpStatusCode.NoContent);
         }
 
+        //Tests that NotFound is returned if Run does not exist
+        [TestMethod]
+        public async Task DeleteRunNotFound()
+        {
+            string token = await LoginTestUser();
+
+            HttpClient client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            HttpResponseMessage response = await client.DeleteAsync(url + "api/Run/-1");
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.NotFound);
+        }
+
         //Tests that users can NOT delete Runs which do not belong to them
         [TestMethod]
         public async Task DeleteRunUnauthorized()
@@ -204,6 +232,25 @@ namespace UnitTests
             HttpResponseMessage response = await client.PostAsync(url + "api/Point/" + runId, stringContent);
 
             Assert.AreEqual(response.StatusCode, HttpStatusCode.Created);
+        }
+
+        //Tests that NotFound is returned if Run does not exist
+        [TestMethod]
+        public async Task NewPointNotFound()
+        {
+            string token = await LoginTestUser();
+
+            HttpClient client = new HttpClient();
+
+            Point point = new Point();
+            point.latitude = 56.3730402904326;
+            point.longitude = 9.65708833471725;
+            point.altitude = 47;
+            var stringContent = new StringContent(JsonConvert.SerializeObject(point), Encoding.UTF8, "application/json");
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            HttpResponseMessage response = await client.PostAsync(url + "api/Point/-1", stringContent);
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.NotFound);
         }
 
         //Tests that user can NOT add points to Runs which do not belong to them

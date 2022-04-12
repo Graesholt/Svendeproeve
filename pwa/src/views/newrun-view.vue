@@ -158,8 +158,10 @@ async function runButton() {
 }
 
 //Updates timer
+//I cannot live in a world were this is honestly the best way to do it,
+//but no one online had a better idea, so this my ugly mistake
+//It does the job
 function updateTimer() {
-  var timer = Date.now() - startTime;
   refTimer.value.hours = Math.floor(timer / 1000 / 60 / 60);
   refTimer.value.minutes = Math.floor((timer - refTimer.value.hours * 1000 * 60 * 60) / 1000 / 60);
   refTimer.value.seconds = Math.floor((timer - refTimer.value.hours * 1000 * 60 * 60 - refTimer.value.minutes * 1000 * 60) / 1000);

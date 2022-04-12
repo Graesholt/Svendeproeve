@@ -26,6 +26,7 @@ namespace WebAPI.Controllers
 
         /// <summary>
         /// Takes a runId as part of URL and a Point object from the webservice.
+        /// Returns NotFound if run does not exist.
         /// Returns Unauthorized if run does not belong to userId found in JWT token.
         /// Otherwise, adds point to database and returns Status Code 201.
         /// </summary>
@@ -39,6 +40,11 @@ namespace WebAPI.Controllers
             //Do not trust client time, server time is reliable
             point.dateTime = DateTime.UtcNow;
             var run = _context.Runs.Include("user").Include("points").FirstOrDefault(r => r.runId == runId);
+
+            if (run == null)
+            {
+                return NotFound();
+            }
 
             if (run.user.userId != GetUserId())
             {

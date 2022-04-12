@@ -39,8 +39,8 @@ namespace WebAPI.Controllers
 
         /// <summary>
         /// Takes a runId as part of URL.
-        /// Returns Unauthorized if run does not belong to userId found in JWT token.
         /// Returns NotFound if run does not exist.
+        /// Returns Unauthorized if run does not belong to userId found in JWT token.
         /// Returns UnprocessableEntity if run contains no points, which should not happen, but can if user redirects from page before sending any points.
         /// Otherwise, returns run in the form of a RunStats DTO.
         /// </summary>
@@ -53,14 +53,14 @@ namespace WebAPI.Controllers
             var run = await _context.Runs.Include("user").Include("points").FirstOrDefaultAsync(r => r.runId == runId);
             //.Include("points") gets a list of points associated with this run as a property on the object.
 
-            if (run.user.userId != GetUserId())
-            {
-                return Unauthorized();
-            }
-
             if (run == null)
             {
                 return NotFound();
+            }
+
+            if (run.user.userId != GetUserId())
+            {
+                return Unauthorized();
             }
 
             if (run.points.Count() == 0)
@@ -97,8 +97,8 @@ namespace WebAPI.Controllers
 
         /// <summary>
         /// Takes a runId as part of URL.
-        /// Returns Unauthorized if run does not belong to userId found in JWT token.
         /// Returns NotFound if run does not exist.
+        /// Returns Unauthorized if run does not belong to userId found in JWT token.
         /// Otherwise, flags run in database as deteled and returns NoContent.
         /// Does NOT actually delete data.
         /// </summary>
@@ -111,14 +111,14 @@ namespace WebAPI.Controllers
             //var run = await _context.Runs.FindAsync(runId);
             var run = await _context.Runs.Include("user").FirstOrDefaultAsync(r => r.runId == runId);
 
-            if (run.user.userId != GetUserId())
-            {
-                return Unauthorized();
-            }
-
             if (run == null)
             {
                 return NotFound();
+            }
+
+            if (run.user.userId != GetUserId())
+            {
+                return Unauthorized();
             }
 
             run.deleted = true;

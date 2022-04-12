@@ -49,13 +49,13 @@
       <div id="run-map"></div>
 
       <p class="center-text chart-header">Højdekurve</p>
-      <div class="center-div scheme-div">
-        <line-chart :data="refAltitudePointList" xtitle="Tid" ytitle="Højde i m" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAltitudeSchemeMin" :max="refAltitudeSchemeMax"></line-chart>
+      <div class="center-div chart-div">
+        <line-chart :data="refAltitudePointList" xtitle="Tid" ytitle="Højde i m" class="chart" empty="Henter data..." :curve="false" :points="false" :min="refAltitudeChartMin" :max="refAltitudeChartMax"></line-chart>
       </div>
 
       <p class="center-text chart-header">Gennemsnitshastighed pr. minut</p>
-      <div class="center-div scheme-div">
-        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="scheme" empty="Henter data..." :curve="false" :points="false" :min="refAvgSpeedPerMinuteSchemeMin" :max="refAvgSpeedPerMinuteSchemeMax" :colors="['#ff6600']"></line-chart>
+      <div class="center-div chart-div">
+        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="chart" empty="Henter data..." :curve="false" :points="AvgSpeedPerMinuteChartPoints" :min="refAvgSpeedPerMinuteChartMin" :max="refAvgSpeedPerMinuteChartMax" :colors="['#ff6600']"></line-chart>
       </div>
     </template>
     <template #footer> </template>
@@ -77,14 +77,15 @@ var refDurationMilliseconds = ref();
 var refDistanceUnit = ref();
 
 var refAltitudePointList = ref([]);
-var refAltitudeSchemeMin = ref();
-var refAltitudeSchemeMax = ref();
-var AltitudeSchemeMargin = 2;
+var refAltitudeChartMin = ref();
+var refAltitudeChartMax = ref();
+var AltitudeChartMargin = 2;
 
 var refAvgSpeedPerMinutePointList = ref([]);
-var refAvgSpeedPerMinuteSchemeMin = ref();
-var refAvgSpeedPerMinuteSchemeMax = ref();
-var AvgSpeedPerMinuteSchemeMargin = 2;
+var AvgSpeedPerMinuteChartPoints = ref();
+var refAvgSpeedPerMinuteChartMin = ref();
+var refAvgSpeedPerMinuteChartMax = ref();
+var AvgSpeedPerMinuteChartMargin = 2;
 
 //Temporary data while waiting for database to respond
 refHeader.value = "Henter data...";
@@ -102,7 +103,7 @@ axios
   .then(function (response) {
     console.log(response.data);
     refRun.value = response.data;
-    //Header configured. UTC time converted to locale time
+    //Header configured. UTC time converted to locale time with en-GB formatting
     refHeader.value = new Date(refRun.value.dateTime + "Z").toLocaleDateString("en-GB") + " - " + new Date(refRun.value.dateTime + "Z").toLocaleTimeString("en-GB");
 
     //Map: creation
@@ -114,15 +115,19 @@ axios
       tileSize: 256,
     }).addTo(map);
 
-    var mapLatLngBounds = new L.LatLngBounds(); //Holds the bounds we are interesting in viewing on map
-    var mapPointList = []; //Holds the LatLngs of each point of the Run
+    //mapLatLngBounds holds the bounds we are interesting in viewing on map
+    var mapLatLngBounds = new L.LatLngBounds();
+    //mapPointList holds the LatLngs of each point of the Run
+    var mapPointList = [];
+    //Loops through points configuring both variables
     refRun.value.points.forEach((element) => {
       var pointLatLng = new L.LatLng(element.latitude, element.longitude);
       mapLatLngBounds.extend(pointLatLng);
       mapPointList.push(pointLatLng);
     });
 
-    map.fitBounds(mapLatLngBounds); //Sets map bounds
+    //Set map bounds
+    map.fitBounds(mapLatLngBounds);
 
     //Map: polyline configuration
     var runPolyline = new L.Polyline(mapPointList, {
@@ -135,7 +140,6 @@ axios
     var startTooltip = L.tooltip({
       direction: "top",
       permanent: true,
-
     })
       .setLatLng(mapPointList[0])
       .setContent("Start")
@@ -174,42 +178,56 @@ axios
     refRun.value.points.forEach((element) => {
       if (refAltitudePointList.value.length == 0 || roundToTwo(element.altitude) != refAltitudePointList.value[refAltitudePointList.value.length - 1][1]) {
         refAltitudePointList.value.push([new Date(element.dateTime + "Z").toLocaleTimeString("en-GB"), roundToTwo(element.altitude)]);
-        if (!refAltitudeSchemeMin.value || element.altitude < refAltitudeSchemeMin.value) { //Find highest value
-          refAltitudeSchemeMin.value = element.altitude;
+        if (!refAltitudeChartMin.value || element.altitude < refAltitudeChartMin.value) {
+          //Find highest value
+          refAltitudeChartMin.value = element.altitude;
         }
-        if (!refAltitudeSchemeMax.value || element.altitude > refAltitudeSchemeMax.value) { //Find lowest value
-          refAltitudeSchemeMax.value = element.altitude;
+        if (!refAltitudeChartMax.value || element.altitude > refAltitudeChartMax.value) {
+          //Find lowest value
+          refAltitudeChartMax.value = element.altitude;
         }
       }
     });
     console.log(refAltitudePointList);
-    //Modify highest and lowest values by AltitudeSchemeMargin to get min and max values of chart
-    refAltitudeSchemeMin.value = Math.round(refAltitudeSchemeMin.value - AltitudeSchemeMargin);
-    refAltitudeSchemeMax.value = Math.round(refAltitudeSchemeMax.value + AltitudeSchemeMargin);
+    //Modify highest and lowest values by AltitudeChartMargin to get min and max values of chart
+    refAltitudeChartMin.value = Math.round(refAltitudeChartMin.value - AltitudeChartMargin);
+    refAltitudeChartMax.value = Math.round(refAltitudeChartMax.value + AltitudeChartMargin);
+    //If only one value was found, set last time to same value, so chart shows a line instead of nothing
+    if(refAltitudePointList.value.length = 1) {
+      refAltitudePointList.value.push([new Date(refRun.value.points[refRun.value.points.length - 1].dateTime + "Z").toLocaleTimeString("en-GB"), roundToTwo(refRun.value.points[refRun.value.points.length - 1].altitude)]);
+    }
 
     //Configuration of speed per minute chart
     for (let i = 0; i < refRun.value.avgSpeedPerMinuteInMetersPerSecond.length; i++) {
       var speedInKmt = roundToTwo((refRun.value.avgSpeedPerMinuteInMetersPerSecond[i] * 3600) / 1000);
       refAvgSpeedPerMinutePointList.value.push([i + 1, speedInKmt]);
-      if (!refAvgSpeedPerMinuteSchemeMin.value || speedInKmt < refAvgSpeedPerMinuteSchemeMin.value) { //Find highest value
-        refAvgSpeedPerMinuteSchemeMin.value = speedInKmt;
+      if (!refAvgSpeedPerMinuteChartMin.value || speedInKmt < refAvgSpeedPerMinuteChartMin.value) {
+        //Find highest value
+        refAvgSpeedPerMinuteChartMin.value = speedInKmt;
       }
-      if (!refAvgSpeedPerMinuteSchemeMax.value || speedInKmt > refAvgSpeedPerMinuteSchemeMax.value) { //Find lowest value
-        refAvgSpeedPerMinuteSchemeMax.value = speedInKmt;
+      if (!refAvgSpeedPerMinuteChartMax.value || speedInKmt > refAvgSpeedPerMinuteChartMax.value) {
+        //Find lowest value
+        refAvgSpeedPerMinuteChartMax.value = speedInKmt;
       }
     }
     console.log(refAvgSpeedPerMinutePointList);
-    //Modify highest and lowest values by AvgSpeedPerMinuteSchemeMargin to get min and max values of chart
-    refAvgSpeedPerMinuteSchemeMin.value = Math.round(refAvgSpeedPerMinuteSchemeMin.value - AvgSpeedPerMinuteSchemeMargin);
-    refAvgSpeedPerMinuteSchemeMax.value = Math.round(refAvgSpeedPerMinuteSchemeMax.value + AvgSpeedPerMinuteSchemeMargin);
+    //Modify highest and lowest values by AvgSpeedPerMinuteChartMargin to get min and max values of chart
+    refAvgSpeedPerMinuteChartMin.value = Math.round(refAvgSpeedPerMinuteChartMin.value - AvgSpeedPerMinuteChartMargin);
+    refAvgSpeedPerMinuteChartMax.value = Math.round(refAvgSpeedPerMinuteChartMax.value + AvgSpeedPerMinuteChartMargin);
+    //Show dots on chart points, if there is only one, for ease of locating it
+    if ((refAvgSpeedPerMinutePointList.value.length = 1)) {
+      AvgSpeedPerMinuteChartPoints.value = true;
+    } else {
+      AvgSpeedPerMinuteChartPoints.value = false;
+    }
   })
   .catch((exception) => {
     console.log(exception.response.status);
-    if (exception.response.status == 401) { //If token userId does not match owner of runId
+    if (exception.response.status == 401) {
+      //If token userId does not match owner of runId
       refHeader.value = "Ugyldigt runId!";
-    }
-    else if (exception.response.status == 422) {
-      refHeader.value = "Ingen punkt data";
+    } else if (exception.response.status == 422) {
+      refHeader.value = "Ingen punktdata";
     }
   });
 
@@ -260,7 +278,7 @@ function roundToTwo(num) {
   font-weight: 600;
 }
 
-.scheme {
+.chart {
   max-width: 100%;
   width: 100%;
   min-height: 150px;
