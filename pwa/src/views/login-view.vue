@@ -20,7 +20,7 @@
       </div>
     </template>
     <template #footer>
-      <p class="center-text version-text">Version: 22.04.12.2019</p>
+      <p class="center-text version-text">Version: 22.04.12.2027</p>
     </template>
   </Card>
 </template>
@@ -38,22 +38,32 @@ var refPassword = ref("");
 var refInputsDisabled = ref("");
 var refErrorDiv = ref("");
 
-refInputsDisabled.value = false; //Ready for input
+//Ready for input
+refInputsDisabled.value = false;
 
-async function attemptLogin() { //Called when Login button is clicked
-  refInputsDisabled.value = true; //Lock input
-  refErrorDiv.value = ""; //Wipe previous error message
+//Called when Login button is clicked
+async function attemptLogin() {
+  //Lock input
+  refInputsDisabled.value = true;
+  //Wipe previous error message
+  refErrorDiv.value = "";
   let user = { username: refUsername.value, password: refPassword.value };
   try {
     let response = await axios.post(process.env.VUE_APP_API_URL + "api/User/Login", user);
-    localStorage.setItem("jwtToken", response.data); //Save jwtToken in localStorage
-    localStorage.setItem("username", refUsername.value); //Save username in localStorage
-    router.push("/runs"); //Send user to Runs page
+    //Save jwtToken in localStorage
+    localStorage.setItem("jwtToken", response.data);
+    //Save username in localStorage
+    localStorage.setItem("username", refUsername.value);
+    //Send user to Runs page
+    router.push("/runs");
   } catch (exception) {
     console.log(exception);
-    if (exception.response.status == 404) { //If user is not found
-      refErrorDiv.value = "Ukorrekte brugeroplysninger"; //Display error to user
-      refInputsDisabled.value = false; //Unlock input
+    //If user is not found
+    if (exception.response.status == 404) {
+      //Display error to user
+      refErrorDiv.value = "Ukorrekte brugeroplysninger";
+      //Unlock input
+      refInputsDisabled.value = false;
     }
   }
 }

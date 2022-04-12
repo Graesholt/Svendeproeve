@@ -37,14 +37,16 @@ var watchId;
 var timerInterval;
 var lock;
 
-refStartRunButton.value = "Start løbetur"; //Change button to show app is ready to run. Same button ends run later
+//Change button to show app is ready to run. Same button ends run later
+refStartRunButton.value = "Start løbetur";
 
 //Set timer values
 refTimer.value.hours = "00";
 refTimer.value.minutes = "00";
 refTimer.value.seconds = "00";
 
-setTimeout(createMap, 100); //Timeout used to make sure HTML is generated before map tries to interact with it
+//Timeout used to make sure HTML is generated before map tries to interact with it
+setTimeout(createMap, 100);
 function createMap() {
   //Map: creation
   var map = L.map("new-run-map", {
@@ -142,7 +144,7 @@ async function runButton() {
           }
         }
       });
-  } //When stop button is pressed
+  } //If button is pressed to stop run
   else if (status.value == "running") {
     status.value = "done";
     //Stop getting location via watchPosition()

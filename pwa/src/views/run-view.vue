@@ -193,7 +193,7 @@ axios
     refAltitudeChartMin.value = Math.round(refAltitudeChartMin.value - AltitudeChartMargin);
     refAltitudeChartMax.value = Math.round(refAltitudeChartMax.value + AltitudeChartMargin);
     //If only one value was found, set last time to same value, so chart shows a line instead of nothing
-    if(refAltitudePointList.value.length = 1) {
+    if(refAltitudePointList.value.length == 1) {
       refAltitudePointList.value.push([new Date(refRun.value.points[refRun.value.points.length - 1].dateTime + "Z").toLocaleTimeString("en-GB"), roundToTwo(refRun.value.points[refRun.value.points.length - 1].altitude)]);
     }
 
@@ -214,8 +214,8 @@ axios
     //Modify highest and lowest values by AvgSpeedPerMinuteChartMargin to get min and max values of chart
     refAvgSpeedPerMinuteChartMin.value = Math.round(refAvgSpeedPerMinuteChartMin.value - AvgSpeedPerMinuteChartMargin);
     refAvgSpeedPerMinuteChartMax.value = Math.round(refAvgSpeedPerMinuteChartMax.value + AvgSpeedPerMinuteChartMargin);
-    //Show dots on chart points, if there is only one, for ease of locating it
-    if ((refAvgSpeedPerMinutePointList.value.length = 1)) {
+    //Show dots on chart points if there is only one, for ease of locating it
+    if ((refAvgSpeedPerMinutePointList.value.length == 1)) {
       AvgSpeedPerMinuteChartPoints.value = true;
     } else {
       AvgSpeedPerMinuteChartPoints.value = false;
@@ -227,6 +227,7 @@ axios
       //If token userId does not match owner of runId
       refHeader.value = "Ugyldigt runId!";
     } else if (exception.response.status == 422) {
+      //If run does not contain a single point
       refHeader.value = "Ingen punktdata";
     }
   });

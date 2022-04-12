@@ -73,7 +73,8 @@ if (lastLetterInUsername == "s" || lastLetterInUsername == "x" || lastLetterInUs
 }
 console.log(lastLetterInUsername);
 
-//Used instead of datatables buildt in loading property, because the loading property dims the whole datatable with a dark overlay
+//Used instead of DataTables buildt in loading property,
+//because the loading property dims the whole DataTable with a dark overlay
 refDatatableEmptyText.value = "Henter data...";
 
 //Set calendar dates
@@ -84,10 +85,11 @@ refDateFrom.value = new Date(Date.now());
 refDateTo.value = new Date(Date.now());
 refDateFrom.value.setMonth(refDateFrom.value.getMonth() - 1);
 //Set time of both calendars to midnight
-refDateFrom.value.setHours(0,0,0,0);
-refDateTo.value.setHours(0,0,0,0);
+refDateFrom.value.setHours(0, 0, 0, 0);
+refDateTo.value.setHours(0, 0, 0, 0);
 
-getRuns(); //Runs getRuns on page load
+//Run getRuns on page load
+getRuns();
 function getRuns() {
   //Gets all runs for the user found in token
   axios
@@ -97,49 +99,58 @@ function getRuns() {
     .then(function (response) {
       console.log(response.data);
       allRuns = response.data;
-      updateTable(); //Updates datatable to show Runs within Calendar dates
+      //Update DataTable to show Runs within Calendar dates
+      updateTable();
     });
 }
 
+//Called by log out button
 function logOut() {
-  //Called by log out button
-  localStorage.setItem("jwtToken", ""); //Delete jwtToken from localStorage
-  localStorage.setItem("username", ""); //Delete username from localStorage
-  router.push("/"); //Send user back to Login page
+  //Delete jwtToken from localStorage
+  localStorage.setItem("jwtToken", "");
+  //Delete username from localStorage
+  localStorage.setItem("username", "");
+  //Send user back to Login page
+  router.push("/");
 }
 
+//Updates datatable to show Runs within Calendar dates
 function updateTable() {
-  //Updates datatable to show Runs within Calendar dates
-  refRuns.value = []; //Empty datatable
+  //Empty datatable
+  refRuns.value = [];
 
   allRuns.forEach((element) => {
     //Test if run falls within dates (UTC time from database converted to local)
-    var runTime = new Date(element.dateTime + "Z")
-    if (Date.parse(runTime) >= Date.parse(refDateFrom.value) && Date.parse(runTime) <= (Date.parse(refDateTo.value) + 86400000)) {
-      refRuns.value.push(element); //Add run to datatable
+    var runTime = new Date(element.dateTime + "Z");
+    if (Date.parse(runTime) >= Date.parse(refDateFrom.value) && Date.parse(runTime) <= Date.parse(refDateTo.value) + 86400000) {
+      //Add run to datatable
+      refRuns.value.push(element);
     }
   });
   //Ugly workaround to return to page 1 of datatable after choosing new dates. Only way I could get to work.
   var firstbutton = document.getElementsByClassName("p-paginator-first p-paginator-element p-link");
   firstbutton[0].click();
 
-  refDatatableEmptyText.value = "Ingen løbeture fundet..."; //Message if no Runs found within dates
+  refDatatableEmptyText.value = "Ingen løbeture fundet..."; //Message to show if no Runs found within dates
   //Databound and set this way, because same property is used above to show loading message (see above)
 }
 
+//Called when a run is clicked
 function viewRun(e) {
-  //Called when a run is clicked
   console.log(e.data.runId);
-  router.push("/run/" + e.data.runId); //Send user to Run details page
+  //Send user to Run details page
+  router.push("/run/" + e.data.runId);
 }
 
+//Called when a runs delete button is clicked
 function deleteRun(slotProps) {
-  //Called when a runs delete button is clicked
+  //Mark run as deleted in database
   axios
     .delete(process.env.VUE_APP_API_URL + "api/Run/" + slotProps.data.runId, {
       headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
     })
     .then(function (response) {
+      //Reload Runs
       getRuns();
     });
 }

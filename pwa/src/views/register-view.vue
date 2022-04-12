@@ -39,12 +39,16 @@ var refInputsDisabled = ref("");
 var refErrorDiv = ref("");
 var refErrorDivStatus = ref("");
 
-refInputsDisabled.value = false; //Ready for input
-refErrorDivStatus.value = "error"; //Set error div to error mode (red text)
+//Ready for input
+refInputsDisabled.value = false;
+//Set error div to error mode (red text)
+refErrorDivStatus.value = "error";
 
 async function attemptRegistration() {
-  refInputsDisabled.value = true; //Lock input
-  refErrorDiv.value = ""; //Wipe previous error message
+  //Lock input
+  refInputsDisabled.value = true;
+  //Wipe previous error message
+  refErrorDiv.value = "";
 
   //User info validation happens again on server with the same checks
   //The checks below are faster for the user, instead of making a call for every attempt
@@ -109,7 +113,7 @@ async function attemptRegistration() {
     return;
   }
   if (!refPassword.value.match(/.*[0-9-@._!?].*/)) {
-    //Password does not include capital letter
+    //Password does not number or special character
     refErrorDiv.value = "Kodeord skal inkludere mindst et tal eller specialtegn (som . - _ @ ! ? )";
     refInputsDisabled.value = false; //Unlock input
     return;
@@ -129,16 +133,21 @@ async function attemptRegistration() {
   let user = { username: refUsername.value, password: refPassword.value };
   try {
     await axios.post(process.env.VUE_APP_API_URL + "api/User/Register", user);
-    refErrorDivStatus.value = "success"; //Set error div to success mode (green text)
+    //Set error div to success mode (green text)
+    refErrorDivStatus.value = "success";
+    //Display success message
     refErrorDiv.value = "Bruger registreret!";
-    await new Promise((r) => setTimeout(r, 2500)); //Wait a moment so user has time to see success message
-    router.push("/"); //Send user back to Login page
+    //Wait a moment so user has time to see success message
+    await new Promise((r) => setTimeout(r, 2500));
+    //Send user back to Login page
+    router.push("/");
   } catch (exception) {
     console.log(exception);
     if (exception.response.status == 409) {
       //If username already in use
       refErrorDiv.value = "Brugernavn er allerede registreret";
-      refInputsDisabled.value = false; //Unlock input
+      //Unlock input
+      refInputsDisabled.value = false;
     }
   }
 }
