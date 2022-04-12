@@ -47,7 +47,7 @@ jobs:
       working-directory: ./WebAPI
 
     steps:
-        - name: Run unit tests
+      - name: Run unit tests
         run: dotnet test --filter "ClassName=UnitTests.UnitTest"
         working-directory: ${{env.working-directory}}
 
