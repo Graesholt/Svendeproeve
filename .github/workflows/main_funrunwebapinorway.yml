@@ -30,7 +30,7 @@ jobs:
         working-directory: ${{env.working-directory}}
 
       - name: Run unit tests
-        run: dotnet test --filter "ClassName=UnitTest"
+        run: dotnet test --filter "ClassName=UnitTests.UnitTest"
         working-directory: ${{env.working-directory}}     
 
       - name: dotnet publish

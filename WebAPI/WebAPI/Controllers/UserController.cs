@@ -115,12 +115,13 @@ namespace WebAPI.Controllers
             return StatusCode(201);
         }
 
+#if debug //if preventing the inclusion of the code contained in a release build.
         /// <summary>
         /// Takes a user object.
         /// Returns Forbid if username or password cannot be validated.
         /// Returns NotFound if username incorrect.
         /// Otherwise, changes user password in dtabase and returns Status Code 201.
-        /// Only for emergency use (such as when password validation is introduced mid-project), and NEVER for production!
+        /// Only for emergency use (such as when password validation is introduced mid-project), and NEVER for release!
         /// </summary>
         /// <param name="registerUser"></param>
         /// <returns></returns>
@@ -149,6 +150,7 @@ namespace WebAPI.Controllers
 
         //    return StatusCode(201);
         //}
+#endif
 
         private bool UserExists(int id)
         {
