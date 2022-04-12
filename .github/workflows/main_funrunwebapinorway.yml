@@ -31,7 +31,6 @@ jobs:
 
       - name: Run unit tests
         run: dotnet test --filter "ClassName=UnitTests.UnitTest"
-        working-directory: ${{env.working-directory}}     
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
