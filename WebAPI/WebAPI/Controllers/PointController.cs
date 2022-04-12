@@ -36,7 +36,8 @@ namespace WebAPI.Controllers
         [HttpPost("{runId}")]
         public async Task<ActionResult<Point>> NewPoint(Point point, int runId)
         {
-            point.dateTime = DateTime.UtcNow; //Do not trust client time, server time is reliable
+            //Do not trust client time, server time is reliable
+            point.dateTime = DateTime.UtcNow;
             var run = _context.Runs.Include("user").Include("points").FirstOrDefault(r => r.runId == runId);
 
             if (run.user.userId != GetUserId())

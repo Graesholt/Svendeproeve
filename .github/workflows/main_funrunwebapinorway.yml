@@ -43,9 +43,6 @@ jobs:
     runs-on: windows-latest
     needs: build
 
-    env:
-      working-directory: ./WebAPI
-
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v2
@@ -54,7 +51,6 @@ jobs:
 
       - name: Run unit tests
         run: dotnet test --filter "ClassName=UnitTests.UnitTest"
-        working-directory: ${{env.working-directory}}
 
   deploy:
     runs-on: windows-latest
