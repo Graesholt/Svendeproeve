@@ -95,13 +95,18 @@ function createMap() {
         //If first point since run started
         if (status.value == "run started") {
           status.value = "running";
-          startTime = Date.now(); //Set Timer start time
-          timerInterval = setInterval(updateTimer, 10); //Update timer ten times a second
-          refStartRunButton.value = "Stop løbetur"; //Change button to show it will now end run
+           //Set Timer start time
+          startTime = Date.now();
+           //Update timer ten times a second
+          timerInterval = setInterval(updateTimer, 10);
+           //Change button to show it will now end run
+          refStartRunButton.value = "Stop løbetur";
         }
       }
-      map.panTo(new L.LatLng(point.latitude, point.longitude)); //Move Map
-      runnerTooltip.setLatLng(new L.LatLng(point.latitude, point.longitude)); //Move current location tooltip
+       //Move Map
+      map.panTo(new L.LatLng(point.latitude, point.longitude));
+       //Move current location tooltip
+      runnerTooltip.setLatLng(new L.LatLng(point.latitude, point.longitude));
     },
     () => {},
     { enableHighAccuracy: true }
@@ -113,7 +118,8 @@ async function runButton() {
   //If ready to start run
   if (status.value == "ready") {
     status.value = "starting run";
-    refStartRunButton.value = "Starter løbetur"; //Change button to show it is inactive
+    //Change button to show it is inactive
+    refStartRunButton.value = "Starter løbetur";
     await axios
       .post(process.env.VUE_APP_API_URL + "api/Run", "", {
         headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
@@ -122,12 +128,14 @@ async function runButton() {
         console.log(response.data);
         runId = response.data.runId;
         console.log(runId);
-        status.value = "run started"; //Ready to log points, now that runId is known
+        //Ready to log points, now that runId is known
+        status.value = "run started";
 
         //Test if wakeLock exists. Will fail on many traditional computers, but not on devices such as phones.
         if ("wakeLock" in navigator) {
           try {
-            lock = await navigator.wakeLock.request("screen"); //Set wakeLock, preventing screen from locking
+            //Set wakeLock, preventing screen from locking
+            lock = await navigator.wakeLock.request("screen");
           } catch (err) {
             //Error occurred
             console.log("Wake Lock error: ", err);
@@ -137,10 +145,13 @@ async function runButton() {
   } //When stop button is pressed
   else if (status.value == "running") {
     status.value = "done";
-    navigator.geolocation.clearWatch(watchId); //Stop getting location via watchPosition()
-    clearInterval(timerInterval); //Stop updating timer
+    //Stop getting location via watchPosition()
+    navigator.geolocation.clearWatch(watchId);
+    //Stop updating timer
+    clearInterval(timerInterval);
     if ("wakeLock" in navigator) {
-      await lock.release(); //Release wakeLock
+      //Release wakeLock
+      await lock.release();
     }
     router.push("/run/" + runId); //Send user to Run details page
   }
@@ -166,10 +177,13 @@ function updateTimer() {
 
 //If page is somehow left while a run is in progress
 onUnmounted(async () => {
-  navigator.geolocation.clearWatch(watchId); //Stop getting location via watchPosition()
-  clearInterval(timerInterval); //Stop updating timer
+  //Stop getting location via watchPosition()
+  navigator.geolocation.clearWatch(watchId);
+  //Stop updating timer
+  clearInterval(timerInterval);
   if ("wakeLock" in navigator) {
-    await lock.release(); //Release wakeLock
+    //Release wakeLock
+    await lock.release();
   }
 });
 </script>
