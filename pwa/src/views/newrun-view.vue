@@ -164,6 +164,9 @@ async function runButton() {
 //but no one online had a better idea, so this my ugly mistake
 //It does the job
 function updateTimer() {
+  //Find exact time difference
+  var timer = Date.now() - startTime;
+  //Calculate hours, minutes, and seconds
   refTimer.value.hours = Math.floor(timer / 1000 / 60 / 60);
   refTimer.value.minutes = Math.floor((timer - refTimer.value.hours * 1000 * 60 * 60) / 1000 / 60);
   refTimer.value.seconds = Math.floor((timer - refTimer.value.hours * 1000 * 60 * 60 - refTimer.value.minutes * 1000 * 60) / 1000);

@@ -55,7 +55,7 @@
 
       <p class="center-text chart-header">Gennemsnitshastighed pr. minut</p>
       <div class="center-div chart-div">
-        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="chart" empty="Henter data..." :curve="false" :points="AvgSpeedPerMinuteChartPoints" :min="refAvgSpeedPerMinuteChartMin" :max="refAvgSpeedPerMinuteChartMax" :colors="['#ff6600']"></line-chart>
+        <line-chart :data="refAvgSpeedPerMinutePointList" xtitle="Minut" ytitle="Km/t" class="chart" empty="Henter data..." :curve="false" :points="AvgSpeedPerMinuteChartPoints" :min="refAvgSpeedPerMinuteChartMin" :max="refAvgSpeedPerMinuteChartMax" :xmin="refAvgSpeedPerMinuteChartStart" :xmax="refAvgSpeedPerMinuteChartEnd" :colors="['#ff6600']"></line-chart>
       </div>
     </template>
     <template #footer> </template>
@@ -83,6 +83,8 @@ var AltitudeChartMargin = 2;
 
 var refAvgSpeedPerMinutePointList = ref([]);
 var AvgSpeedPerMinuteChartPoints = ref();
+var refAvgSpeedPerMinuteChartStart = ref()
+var refAvgSpeedPerMinuteChartEnd = ref()
 var refAvgSpeedPerMinuteChartMin = ref();
 var refAvgSpeedPerMinuteChartMax = ref();
 var AvgSpeedPerMinuteChartMargin = 2;
@@ -214,11 +216,15 @@ axios
     //Modify highest and lowest values by AvgSpeedPerMinuteChartMargin to get min and max values of chart
     refAvgSpeedPerMinuteChartMin.value = Math.round(refAvgSpeedPerMinuteChartMin.value - AvgSpeedPerMinuteChartMargin);
     refAvgSpeedPerMinuteChartMax.value = Math.round(refAvgSpeedPerMinuteChartMax.value + AvgSpeedPerMinuteChartMargin);
-    //Show dots on chart points if there is only one, for ease of locating it
+    //Show dots on chart points if there is only one minute, for ease of locating it
     if ((refAvgSpeedPerMinutePointList.value.length == 1)) {
       AvgSpeedPerMinuteChartPoints.value = true;
+      refAvgSpeedPerMinuteChartStart.value = 0;
+      refAvgSpeedPerMinuteChartEnd.value = 2;
     } else {
       AvgSpeedPerMinuteChartPoints.value = false;
+      refAvgSpeedPerMinuteChartStart.value = 1;
+      refAvgSpeedPerMinuteChartEnd.value = refAvgSpeedPerMinutePointList.value.length;
     }
   })
   .catch((exception) => {

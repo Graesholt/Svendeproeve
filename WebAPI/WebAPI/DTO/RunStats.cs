@@ -43,7 +43,8 @@ namespace WebAPI.DTO
             avgSpeedPerMinuteInMetersPerSecond = new List<double>();
             avgSpeedPerMinuteInMetersPerSecond.Add(0);
             int minute = 1;
-            int restPrecisionFactor = 1000; //Number of parts to split remainders between minutes into. With the frequency of points being no more than a few seconds, 1000 should be plenty accurate
+            //Number of parts to split remainders between minutes into. With the frequency of points being no more than a few seconds, 1000 should be plenty accurate
+            int restPrecisionFactor = 1000;
             for (int i1 = 0; i1 < run.points.Count() - 1; i1++)
             {
                 if (run.points[i1 + 1].dateTime < run.dateTime.AddMinutes(minute))
