@@ -117,7 +117,7 @@ axios
       tileSize: 256,
     }).addTo(map);
 
-    //mapLatLngBounds holds the bounds we are interesting in viewing on map
+    //mapLatLngBounds holds the bounds we are interested in viewing on map
     var mapLatLngBounds = new L.LatLngBounds();
     //mapPointList holds the LatLngs of each point of the Run
     var mapPointList = [];

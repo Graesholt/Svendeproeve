@@ -97,7 +97,7 @@ function createMap() {
         //If first point since run started
         if (status.value == "run started") {
           status.value = "running";
-          //Set Timer start time
+          //Set timer start time
           startTime = Date.now();
           //Update timer ten times a second
           timerInterval = setInterval(updateTimer, 10);
