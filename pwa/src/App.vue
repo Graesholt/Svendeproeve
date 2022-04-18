@@ -12,7 +12,7 @@ const router = useRouter();
 //Redirects to Login page if token is bad
 //Redirects to Runs page, from Login or Register pages, if the token is good
 axios
-  .get(process.env.VUE_APP_API_URL + "api/Run", {
+  .get(process.env.VUE_APP_API_URL + "api/User", {
     headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
   })
   .catch((error) => {

@@ -132,7 +132,7 @@ function updateTable() {
   firstbutton[0].click();
 
   refDatatableEmptyText.value = "Ingen løbeture fundet..."; //Message to show if no Runs found within dates
-  //Databound and set this way, because same property is used above to show loading message (see above)
+  //Databound this way, because same property is used above to show loading message (see above)
 }
 
 //Called when a run is clicked

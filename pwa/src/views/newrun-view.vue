@@ -88,12 +88,13 @@ function createMap() {
         altitude: position.coords.altitude,
       };
       console.log("point", point);
+      var pointLatLng = new L.LatLng(point.latitude, point.longitude);
       //If a run is in progress
       if (status.value == "run started" || status.value == "running") {
         //Post point to API
         axios.post(process.env.VUE_APP_API_URL + "api/Point/" + runId, point, { headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` } });
         //Add point to map polyline
-        runPolyline.addLatLng(new L.LatLng(point.latitude, point.longitude));
+        runPolyline.addLatLng(pointLatLng);
         //If first point since run started
         if (status.value == "run started") {
           status.value = "running";
@@ -106,9 +107,9 @@ function createMap() {
         }
       }
       //Move Map
-      map.panTo(new L.LatLng(point.latitude, point.longitude));
+      map.panTo(pointLatLng);
       //Move current location tooltip
-      runnerTooltip.setLatLng(new L.LatLng(point.latitude, point.longitude));
+      runnerTooltip.setLatLng(pointLatLng);
     },
     () => {},
     { enableHighAccuracy: true }

@@ -16,6 +16,7 @@ using System.Text;
 
 using BCryptNet = BCrypt.Net.BCrypt;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
@@ -113,6 +114,18 @@ namespace WebAPI.Controllers
             await _context.SaveChangesAsync();
 
             return StatusCode(201);
+        }
+
+        /// <summary>
+        /// Returns Unauthorised if token is bad or not found
+        /// Returns Ok if token is good
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet()]
+        public ActionResult AuthorizeUser()
+        {
+            return Ok();
         }
 
 #if debug //if preventing the inclusion of the code contained in a release build.
