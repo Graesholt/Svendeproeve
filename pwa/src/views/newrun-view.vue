@@ -87,8 +87,8 @@ function createMap() {
         longitude: position.coords.longitude,
         altitude: position.coords.altitude,
       };
-      console.log("point", point);
       var pointLatLng = new L.LatLng(point.latitude, point.longitude);
+      console.log("point", point);
       //If a run is in progress
       if (status.value == "run started" || status.value == "running") {
         //Post point to API
